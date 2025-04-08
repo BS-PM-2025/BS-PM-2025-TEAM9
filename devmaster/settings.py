@@ -126,6 +126,7 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = '/home/student/'  # Temporary default
+LOGIN_REDIRECT_URL = '/redirect-after-login/'
 LOGOUT_REDIRECT_URL = '/login/'       # Redirect to login after logout
+
 

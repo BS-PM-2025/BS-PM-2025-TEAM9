@@ -3,6 +3,7 @@ from django.contrib.auth import login
 from .forms import UserForm, StudentSignupForm, TeacherSignupForm
 from .models import Student, Teacher
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
 
 def student_signup(request):
     if request.method == 'POST':
@@ -54,3 +55,16 @@ def student_home(request):
 @login_required
 def teacher_home(request):
     return render(request, 'users/teacher_home.html')
+def root_redirect(request):
+    return redirect('login')
+
+
+@login_required
+def redirect_after_login(request):
+    user = request.user
+    if hasattr(user, 'student'):
+        return redirect('student_home')
+    elif hasattr(user, 'teacher'):
+        return redirect('teacher_home')
+    else:
+        return redirect('login')  # fallback in case user has no role
