@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
-from .models import Student, Teacher
+from .models import Student, Teacher, Manager  
+
 
 class UserForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
@@ -18,3 +19,7 @@ class TeacherSignupForm(forms.ModelForm):
     class Meta:
         model = Teacher
         fields = ['expertise']
+class ManagerSignupForm(forms.ModelForm):
+    class Meta:
+        model = Manager
+        fields = ['department']

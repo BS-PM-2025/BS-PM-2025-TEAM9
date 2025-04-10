@@ -1,0 +1,7 @@
+<h2>Manager Signup</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ user_form.as_p }}
+    {{ profile_form.as_p }}
+    <button type="submit">Sign Up as Manager</button>
+</form>

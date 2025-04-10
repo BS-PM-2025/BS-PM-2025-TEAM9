@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
-from .forms import UserForm, StudentSignupForm, TeacherSignupForm
+from .forms import UserForm, StudentSignupForm, TeacherSignupForm, ManagerSignupForm
 from .models import Student, Teacher
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
@@ -66,5 +66,31 @@ def redirect_after_login(request):
         return redirect('student_home')
     elif hasattr(user, 'teacher'):
         return redirect('teacher_home')
+    elif hasattr(user, 'manager'):
+        return redirect('manager_home')
     else:
-        return redirect('login')  # fallback in case user has no role
+        return redirect('login')
+
+def manager_signup(request):
+    if request.method == 'POST':
+        user_form = UserForm(request.POST)
+        manager_form = ManagerSignupForm(request.POST)
+        if user_form.is_valid() and manager_form.is_valid():
+            user = user_form.save(commit=False)
+            user.set_password(user_form.cleaned_data['password'])
+            user.save()
+            manager = manager_form.save(commit=False)
+            manager.user = user
+            manager.save()
+            login(request, user)
+            return redirect('manager_home')
+    else:
+        user_form = UserForm()
+        manager_form = ManagerSignupForm()
+    return render(request, 'users/manager_signup.html', {
+        'user_form': user_form,
+        'profile_form': manager_form
+    })
+@login_required
+def manager_home(request):
+    return render(request, 'users/manager_home.html')
