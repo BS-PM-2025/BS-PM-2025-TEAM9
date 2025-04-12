@@ -1,0 +1,54 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Welcome to DevMaster</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+            background: url("{% static 'users/img/welcomeBG.jpg' %}") no-repeat center center fixed;
+            background-size: cover;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .overlay {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 40px;
+            border-radius: 20px;
+            color: white;
+            text-align: center;
+            width: 400px;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+        }
+
+        .btn {
+            background-color: #55ccff;
+            color: white;
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .btn:hover {
+            background-color: #1aa7e0;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay">
+        <h1>Welcome to DevMaster</h1>
+        <p>Sign in or make a new account</p>
+        <a href="{% url 'login' %}"><button class="btn">Login</button></a>
+        <a href="{% url 'signup' %}"><button class="btn">Signup</button></a>
+    </div>
+</body>
+</html>

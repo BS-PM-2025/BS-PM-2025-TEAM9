@@ -38,8 +38,14 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users',
-
+    'home',
+ 
 ]
+
+
+
+
+
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -57,6 +63,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 TEMPLATES = [
     {
+        'DIRS': [BASE_DIR / 'users' / 'templates'],
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'users', 'templates')],  # 👈 this line tells Django where to look
         'APP_DIRS': True,
@@ -121,12 +128,17 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'users', 'static'),
+]
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-LOGIN_REDIRECT_URL = '/redirect-after-login/'
-LOGOUT_REDIRECT_URL = '/login/'       # Redirect to login after logout
 
+LOGIN_URL = '/login/'                   # ✅ This is the correct login page
+LOGIN_REDIRECT_URL = '/redirect-after-login/'   # ✅ or use '/' or any home/dashboard
+LOGOUT_REDIRECT_URL = '/welcome/'      # ✅ This one is perfect
 
+STATIC_ROOT = BASE_DIR / 'staticfiles'

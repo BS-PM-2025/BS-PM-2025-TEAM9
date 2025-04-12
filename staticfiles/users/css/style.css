@@ -1,0 +1,31 @@
+body {
+    margin: 0;
+    background-image: url('../img/background.jpg');
+    background-size: cover;
+    background-position: center;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.overlay {
+    background-color: rgba(0, 0, 0, 0.6);
+    width: 400px;
+    padding: 30px;
+    border-radius: 15px;
+    text-align: center;
+    color: white;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.btn {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    background-color: #55ccff;
+    color: white;
+    border-radius: 10px;
+    cursor: pointer;
+}

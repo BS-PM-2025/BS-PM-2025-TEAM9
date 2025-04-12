@@ -21,5 +21,10 @@ urlpatterns = [
     path('', include('users.urls')), 
     path('', include('django.contrib.auth.urls')), 
     path('', include('django.contrib.auth.urls')),
-
+    path('admin/', admin.site.urls),
+    path('', include('users.urls')),
+    path('admin/', admin.site.urls),  # ✅ פעם אחת בלבד
+    path('', include('users.urls')),  # דוגמה להכללת אפליקציה
 ]
+  
+

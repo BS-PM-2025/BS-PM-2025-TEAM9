@@ -1,11 +1,148 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Student Home - DevMaster</title>
+    <title>Student Home</title>
+    
+    <style>
+        body {
+            display: flex;
+            font-family: Arial, sans-serif;
+            margin: 0;
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #2c3e50;
+            color: white;
+            height: 100vh;
+            padding-top: 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            padding: 15px;
+            text-decoration: none;
+            border-bottom: 1px solid #34495e;
+        }
+
+        .sidebar a:hover {
+            background-color: #34495e;
+        }
+
+        .main {
+            flex: 1;
+            padding: 20px;
+            background: linear-gradient(to right, #a8edea, #fed6e3);
+        }
+
+        .schedule-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .schedule-table th, .schedule-table td {
+            border: 1px solid #999;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .details-box {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 5px;
+            height: 200px;
+            overflow-y: auto;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome, Student {{ request.user.username }} 👩‍🎓</h1>
-    <p>This is your student dashboard.</p>
-    <p><a href="{% url 'logout' %}">Logout</a></p>
+    <div class="sidebar">
+        <a href="{% url 'view_grades' %}">📊 View Grades</a>
+        {% comment %} <a href="{% url 'student_messages' %}">✉️ Messages</a> {% endcomment %}
+        <a href="{% url 'student_messages' %}" class="btn btn-primary">📨 Messages</a>
+
+
+        <a href="{% url 'edit_student_profile' %}">⚙️ Profile</a>
+        <a href="{% url 'login' %}">🔒 Logout</a>
+        {% comment %} <a href="{% url 'logout' %}">🔒 Logout</a> {% endcomment %}
+    </div>
+
+    <div class="main">
+        <h2>Welcome </h2>
+        <table class="schedule-table">
+            <tr>
+                <th>Day</th>
+                <th>Time</th>
+                <th>Subject</th>
+            </tr>
+            {% for item in schedule %}
+            <tr onclick="showDetails('{{ item.day }}', '{{ item.time|date:"H:i" }}')">
+                <td>{{ item.day }}</td>
+                <td>{{ item.time }}</td>
+                <td>{{ item.subject }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="3">No schedule yet.</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <h3>Details for selected day</h3>
+        <h2>📩 Messages from Teachers</h2>
+        <ul>
+            {% for msg in messages %}
+            <li><strong>{{ msg.sender.username }}:</strong> {{ msg.message }} <br><small>{{ msg.timestamp }}</small></li>
+            {% empty %}
+            <li>No messages yet.</li>
+            {% endfor %}
+        </ul>
+        
+
+        <div class="details-box" id="details">
+            Click a day to see events (homework, exams, lessons).
+        </div>
+    </div>
+
+    <script>
+        const events = {{ events_json|safe }};
+    
+        function showDetailsByDate(dateString) {
+            const filtered = events.filter(e => e.date === dateString);
+            const box = document.getElementById('details');
+            if (filtered.length > 0) {
+                box.innerHTML = filtered.map(e => `
+                    <p>
+                        <b>${e.event_type.toUpperCase()}</b>: ${e.title} <br>
+                        <small>📅 ${e.date}</small>
+                    </p>`).join('');
+            } else {
+                box.innerHTML = "<p>No events for this date.</p>";
+            }
+        }
+    </script>
+    
+    <table>
+        <tr>
+            <th>Date</th>
+            <th>Day</th>
+            <th>Time</th>
+            <th>Subject</th>
+            <th>Teacher</th>
+        </tr>
+        {% for item in schedule %}
+        <tr>
+            <td>{{ item.date }}</td>
+            <td>{{ item.day }}</td>
+            <td>{{ item.time }}</td>
+            <td>{{ item.subject }}</td>
+            <td>{{ item.teacher.user.username }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    
+    
 </body>
 </html>
