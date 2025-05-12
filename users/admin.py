@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Student, Teacher, Manager
+from .models import Student, Teacher, Manager, LearningLevel
 from .models import StudentSchedule
 from .models import TeacherMessage
 
