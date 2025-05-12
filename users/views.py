@@ -8,7 +8,7 @@ import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.dateformat import format
 from django.http import JsonResponse
-
+from .models import Message
 
 
 
@@ -71,12 +71,25 @@ def teacher_signup(request):
 def welcome(request):
     return render(request, 'users/welcome.html')
 
+def student_dashboard(request):
+    user = request.user
 
+    # הודעות לסטודנט
+    messages = Message.objects.filter(receiver=user).order_by('-timestamp')
 
+    # הבאת האובייקט של הסטודנט + רמת הלימוד שלו
+    student = get_object_or_404(Student, user=user)
+    level = student.learning_level  # זה אובייקט מסוג LearningLevel
+
+    return render(request, 'student_dashboard.html', {
+        'messages': messages,
+        'student': student,
+        'level': level,
+    })
 @login_required
 def student_home(request):
     return render(request, 'users/student_home.html')
-
+    
 @login_required
 def teacher_home(request):
     return render(request, 'users/teacher_home.html')
