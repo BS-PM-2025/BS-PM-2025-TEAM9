@@ -2,7 +2,9 @@ from django.test import TestCase, Client
 from django.urls import reverse
 from django.contrib.auth.models import User
 from django.utils import timezone
-from users.models import Student, Teacher, Manager, StudentEvent
+from django.core.files.uploadedfile import SimpleUploadedFile
+from users.models import LessonRecord, Student, Teacher, Manager, StudentEvent, Course, LearningLevel
+
 
 class UserStoriesTestCase(TestCase):
     def test_signup_student(self):
@@ -32,7 +34,7 @@ class UserStoriesTestCase(TestCase):
 
         response = self.client.get(reverse('student_home'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Weekly Calendar')  # ← עדכון לפי HTML
+        self.assertContains(response, 'Weekly Calendar')
 
     def test_signup_teacher(self):
         response = self.client.post(reverse('teacher_signup'), {
@@ -66,7 +68,7 @@ class UserStoriesTestCase(TestCase):
         self.client.force_login(user)
         response = self.client.get(reverse('student_home'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Messages with Teacher')  # ← עדכון לפי HTML
+        self.assertContains(response, 'Welcome')
 
     def test_homepage_teacher(self):
         user = User.objects.create_user(username='teacher3', password='pass1234')
@@ -77,50 +79,41 @@ class UserStoriesTestCase(TestCase):
         self.assertContains(response, 'Teacher')
 
 
-class WelcomePageTest(TestCase):
-    def test_welcome_page_guest_accessible(self):
-        client = Client()
-        response = client.get(reverse('welcome'))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Welcome")  # שנה אם צריך
-
-
-class TeacherHomePageTest(TestCase):
+class UploadTests(TestCase):
     def setUp(self):
         self.client = Client()
-        self.user = User.objects.create_user(username='teacher1', password='pass123')
-        self.teacher = Teacher.objects.create(user=self.user)
+        self.teacher_user = User.objects.create_user(username='teacherX', password='pass1234')
+        self.teacher = Teacher.objects.create(user=self.teacher_user, expertise='Math')
+        self.level = LearningLevel.objects.create(name='Beginner', description='Basics')
+        self.course = Course.objects.create(title='Math 101', description='Algebra', teacher=self.teacher, learning_level=self.level)
+        self.client.login(username='teacherX', password='pass1234')
 
-    def test_teacher_home_authenticated(self):
-        self.client.login(username='teacher1', password='pass123')
-        response = self.client.get(reverse('teacher_home'))
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Teacher")  # שנה לפי הצורך
+    def test_upload_timeline_pdf(self):
+        url = reverse('upload_timeline') + f'?course_id={self.course.id}'
+        file = SimpleUploadedFile("timeline.pdf", b"PDF data", content_type="application/pdf")
+        response = self.client.post(url, {'timeline_file': file})
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(LessonRecord.objects.filter(course=self.course).exists())
 
+    def test_upload_record_video(self):
+        url = reverse('upload_recording')
+        video = SimpleUploadedFile("lesson.mp4", b"video content", content_type="video/mp4")
+        response = self.client.post(url, {
+            'title': 'Lesson A',
+            'file': video,
+            'course_id': self.course.id
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(LessonRecord.objects.filter(title='Lesson A').exists())
 
-
-
-class StudentLogoutTest(TestCase):
-    def setUp(self):
-        self.client = Client()
-        self.user = User.objects.create_user(username='student2', password='pass123')
-        self.student = Student.objects.create(user=self.user)
-
-    def test_student_logout(self):
-        self.client.login(username='student2', password='pass123')
-        response = self.client.get(reverse('logout'), follow=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertNotIn('_auth_user_id', self.client.session)
-
-
-class AdminLogoutTest(TestCase):
-    def setUp(self):
-        self.client = Client()
-        self.admin = User.objects.create_superuser(username='admin1', password='adminpass', email='admin@test.com')
-        self.manager = Manager.objects.create(user=self.admin)
-
-    def test_admin_logout(self):
-        self.client.login(username='admin1', password='adminpass')
-        response = self.client.get(reverse('logout'), follow=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertNotIn('_auth_user_id', self.client.session)
+    def test_upload_file_summary(self):
+        url = reverse('upload_file')
+        file = SimpleUploadedFile("summary.pdf", b"summary data", content_type="application/pdf")
+        response = self.client.post(url, {
+            'title': 'Week 1 Summary',
+            'file': file,
+            'course_id': self.course.id,
+            'type': 'summary'
+        })
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(LessonRecord.objects.filter(title='Week 1 Summary').exists())

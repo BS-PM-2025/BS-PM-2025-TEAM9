@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">📝 My Assignments</h1>
+    
+    <div class="card shadow">
+        <div class="card-body">
+            {% if assignments %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Assignment</th>
+                            <th>Course</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Grade</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in assignments %}
+                        <tr class="{% if item.is_past_due and not item.submission %}table-danger{% elif item.submission %}table-success{% endif %}">
+                            <td>{{ item.assignment.content.title }}</td>
+                            <td>{{ item.assignment.content.section.course.title }}</td>
+                            <td>
+                                {{ item.assignment.deadline|date:"M d, Y H:i" }}
+                                {% if item.is_past_due %}<span class="badge bg-danger">Past Due</span>{% endif %}
+                            </td>
+                            <td>
+                                {% if item.submission %}
+                                    <span class="badge bg-success">Submitted</span>
+                                    {% if item.submission.is_late %}<span class="badge bg-warning">Late</span>{% endif %}
+                                {% else %}
+                                    <span class="badge bg-secondary">Pending</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if item.submission and item.submission.grade is not None %}
+                                    {{ item.submission.grade }}/{{ item.assignment.max_points }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{% url 'assignment_detail' item.assignment.id %}" class="btn btn-sm btn-outline-primary">
+                                    {% if item.submission %}View{% else %}Submit{% endif %}
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                You don't have any assignments yet.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

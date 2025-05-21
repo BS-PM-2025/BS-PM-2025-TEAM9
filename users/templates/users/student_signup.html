@@ -37,14 +37,56 @@
     </style>
 </head>
 <body>
-    <div class="form-container">
-        <h2>Student Signup</h2>
-        <form method="post">
-            {% csrf_token %}
-            {{ user_form.as_p }}
-            {{ profile_form.as_p }}
-            <button type="submit">Sign Up</button>
-        </form>
-    </div>
+<div class="form-container">
+    <h2>Create Your Account</h2>
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- User Form -->
+        {{ user_form.username.label_tag }}
+        {{ user_form.username }}
+
+        {{ user_form.email.label_tag }}
+        {{ user_form.email }}
+
+        {{ user_form.password.label_tag }}
+        {{ user_form.password }}
+
+        {{ user_form.confirm_password.label_tag }}
+        {{ user_form.confirm_password }}
+
+        {{ user_form.profile.label_tag }}
+        {{ user_form.profile }}
+
+        <!-- Student Bio -->
+        {{ profile_form.bio.label_tag }}
+        {{ profile_form.bio }}
+
+        <!-- Docker Knowledge (בהתחלה מוסתר) -->
+        <div id="docker-question" style="display: none;">
+            {{ profile_form.docker_knowledge.label_tag }}
+            {{ profile_form.docker_knowledge }}
+        </div>
+
+        <button type="submit">Sign Up</button>
+    </form>
+</div>
+
+<script>
+    const profileSelect = document.querySelector('select[name="profile"]');
+    const dockerQuestion = document.getElementById('docker-question');
+
+    function toggleDockerQuestion() {
+        if (profileSelect.value.toLowerCase() === 'student') {
+            dockerQuestion.style.display = 'block';
+        } else {
+            dockerQuestion.style.display = 'none';
+        }
+    }
+
+    // Check immediately + on change
+    toggleDockerQuestion();
+    profileSelect.addEventListener('change', toggleDockerQuestion);
+</script>
 </body>
 </html>

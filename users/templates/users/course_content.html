@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load course_tags %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h2>{{ course.title }}</h2>
+                    <p class="mb-0">{{ course.description }}</p>
+                </div>
+                <div class="card-body">
+                    {% for section in sections %}
+                    <div class="mb-5">
+                        <h3 class="border-bottom pb-2">{{ section.title }}</h3>
+                        
+                        <div class="list-group mt-3">
+                            {% for content in section.contents.all %}
+                            <div class="list-group-item mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-1">{{ content.title }}</h5>
+                                    <span class="badge bg-secondary">{{ content.get_content_type_display }}</span>
+                                </div>
+                                
+                                {% if content.content_type == 'text' %}
+                                    <div class="mt-2">{{ content.text_content|linebreaks }}</div>
+                                {% elif content.content_type == 'file' %}
+                                    <a href="{{ content.file.url }}" class="btn btn-sm btn-outline-primary mt-2" download>
+                                        <i class="fas fa-download"></i> Download File
+                                    </a>
+                                {% elif content.content_type == 'video' %}
+                                    <div class="ratio ratio-16x9 mt-2">
+                                        <iframe src="{{ content.video_url }}" allowfullscreen></iframe>
+                                    </div>
+                                {% elif content.content_type == 'audio' %}
+                                    <audio controls class="mt-2 w-100">
+                                        <source src="{{ content.audio_file.url }}">
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                {% elif content.content_type == 'assignment' %}
+                                    <div class="mt-3">
+                                        
+                                        <p><strong>Instructions:</strong> {{ content.assignment_instructions }}</p>
+                                        <p><strong>Due:</strong> {{ content.assignment_due_date }}</p>
+                                        {% if content.assignment %}
+                                            {% with assignment=content.assignment %}
+                                                {% if assignment.deadline < current_time %}
+                                                    <span class="badge bg-danger">Past Due</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning text-dark">Due {{ assignment.deadline|timeuntil }}</span>
+                                                {% endif %}
+                                                
+                                                {% if assignment.submission %}
+                                                    <a href="{% url 'view_submission' assignment.submission.id %}" class="btn btn-sm btn-success ms-2">
+                                                        View Submission
+                                                    </a>
+                                                {% else %}
+                                                    <!-- Replace this link with a modal-triggering button -->
+                                                    <button class="btn btn-sm btn-primary ms-2 submit-assignment-btn" 
+                                                            data-assignment-id="{{ assignment.id }}"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#submissionModal">
+                                                        <i class="fas fa-upload"></i> Submit Assignment
+                                                    </button>
+                                                {% endif %}
+                                            {% endwith %}
+                                        {% endif %}
+                                    </div>
+                                {% comment %} {% endif %} {% endcomment %}
+                                {% elif content.content_type == 'link' %}
+                                    <a href="{{ content.external_link }}" target="_blank" class="btn btn-sm btn-outline-primary mt-2">
+                                        <i class="fas fa-external-link-alt"></i> Visit Link
+                                    </a>
+                                {% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <a href="{% url 'student_home' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+</div>
+<!-- Add this at the bottom of course_content.html -->
+<div class="modal fade" id="submissionModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Submit Assignment</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="submissionForm" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="modal-body">
+          <div class="mb-3">
+            <label for="submitted_file" class="form-label">Upload File</label>
+            <input class="form-control" type="file" id="submitted_file" name="submitted_file">
+          </div>
+          <div class="mb-3">
+            <label for="submission_text" class="form-label">Or enter text</label>
+            <textarea class="form-control" id="submission_text" name="submission_text" rows="5"></textarea>
+          </div>
+          <input type="hidden" id="assignment_id" name="assignment_id" value="">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Handle modal opening and assignment ID setting
+    document.querySelectorAll('.submit-assignment-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const assignmentId = this.getAttribute('data-assignment-id');
+            document.getElementById('assignment_id').value = assignmentId;
+            console.log('Setting assignment ID:', assignmentId);
+        });
+    });
+    
+    // Handle form submission
+    const submissionForm = document.getElementById('submissionForm');
+    if (submissionForm) {
+        submissionForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            console.log('Form submission initiated');
+            
+            const formData = new FormData(this);
+            const submitUrl = "{% url 'submit_assignment' %}";
+            
+            try {
+                const response = await fetch(submitUrl, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+                    }
+                });
+                
+                const data = await response.json();
+                console.log('Server response:', data);
+                
+                if (data.success) {
+                    // Close the modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('submissionModal'));
+                    modal.hide();
+                    
+                    // Show success message
+                    alert('Assignment submitted successfully!');
+                    
+                    // Refresh the page after a short delay
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                } else {
+                    alert('Error: ' + (data.message || 'Submission failed'));
+                }
+            } catch (error) {
+                console.error('Submission error:', error);
+                alert('Network error occurred. Please try again.');
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

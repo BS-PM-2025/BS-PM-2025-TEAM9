@@ -1,0 +1,26 @@
+ {% extends "base.html" %}
+
+{% block content %}
+<div class="upload-container" style="max-width: 700px; margin: 50px auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 0 30px rgba(0,0,0,0.1);">
+ <h2 style="text-align:center; font-weight: bold;">🎥 Upload Instructional Video</h2>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" name="upload_type" value="video">
+
+        <div style="border: 2px dashed #ccc; border-radius: 10px; padding: 30px; text-align: center;">
+            <p style="font-weight:bold; margin-bottom:10px;">📹 Upload MP4 / WebM Video</p>
+            <input type="file" name="video_upload" accept="video/mp4,video/webm" required>
+            <div style="margin-top: 20px;">
+                <label for="timeline_video" style="font-weight: bold;">🗓️ Timeline:</label>
+                <input type="date" name="timeline_date" id="timeline_video" required>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top: 20px;">
+            <button type="submit" style="padding: 10px 25px; background-color: #27ae60; color: white; border: none; border-radius: 5px; font-weight: bold;">
+                Upload Video
+            </button>
+        </div>
+    </form>
+</div>
+{% endblock %}

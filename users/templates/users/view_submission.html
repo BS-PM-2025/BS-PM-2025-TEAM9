@@ -1,0 +1,55 @@
+{% extends 'student/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Submission Details</h2>
+        </div>
+        <div class="card-body">
+            <div class="mb-4">
+                <h4>Assignment: {{ submission.assignment.content.title }}</h4>
+                <p class="text-muted">Course: {{ submission.assignment.content.section.course.title }}</p>
+            </div>
+            
+            <div class="mb-4 p-3 bg-light rounded">
+                <h5>Your Submission</h5>
+                <p>Submitted on: {{ submission.submitted_at|date:"M d, Y H:i" }}</p>
+                {% if submission.is_late %}
+                    <span class="badge bg-warning">Submitted Late</span>
+                {% endif %}
+                
+                {% if submission.submitted_file %}
+                    <p>File: <a href="{{ submission.submitted_file.url }}" target="_blank">{{ submission.submitted_file.name|cut:"submissions/" }}</a></p>
+                {% endif %}
+                
+                {% if submission.submission_text %}
+                    <div class="p-2 bg-white rounded">
+                        {{ submission.submission_text|linebreaks }}
+                    </div>
+                {% endif %}
+            </div>
+            
+            {% if submission.grade is not None %}
+            <div class="p-3 bg-light rounded">
+                <h5>Feedback</h5>
+                <p>Grade: {{ submission.grade }}/{{ submission.assignment.max_points }}</p>
+                {% if submission.feedback %}
+                    <div class="p-2 bg-white rounded">
+                        {{ submission.feedback|linebreaks }}
+                    </div>
+                {% endif %}
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                Your submission hasn't been graded yet.
+            </div>
+            {% endif %}
+            
+            <div class="mt-4">
+                <a href="{% url 'assignment_list' %}" class="btn btn-primary">Back to Assignments</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

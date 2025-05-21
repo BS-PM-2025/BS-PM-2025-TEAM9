@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1>Available Courses</h1>
+            <p class="text-muted">Courses matching your learning level: {{ request.user.student.learning_level }}</p>
+        </div>
+        <div class="col-md-4">
+            <form method="get" class="d-flex">
+                <input type="text" name="q" value="{{ search_query }}" 
+                       class="form-control" placeholder="Search courses...">
+                <button type="submit" class="btn btn-primary ms-2">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {% if available_courses %}
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        {% for course in available_courses %}
+        <div class="col">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ course.title }}</h5>
+                    <h6 class="card-subtitle mb-2 text-muted">
+                        Taught by {{ course.teacher.user.get_full_name }}
+                    </h6>
+                    <p class="card-text">{{ course.description|truncatewords:20 }}</p>
+                </div>
+                <div class="card-footer bg-white border-top-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="badge bg-primary rounded-pill">
+                            {{ course.learning_level }}
+                        </span>
+                        <a href="{% url 'student_course_detail' course.id %}" 
+                           class="btn btn-sm btn-outline-primary">
+                            View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        {% if search_query %}
+            No courses found matching your search.
+        {% else %}
+            No available courses match your current learning level.
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if enrolled_courses %}
+    <div class="mt-5">
+        <h2>Your Enrolled Courses</h2>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-2">
+            {% for course in enrolled_courses %}
+            <div class="col">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ course.title }}</h5>
+                        <h6 class="card-subtitle mb-2 text-muted">
+                            Taught by {{ course.teacher.user.get_full_name }}
+                        </h6>
+                        <p class="card-text">{{ course.description|truncatewords:20 }}</p>
+                    </div>
+                    <div class="card-footer bg-white border-top-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{% url 'student_course_content' course.id %}" 
+                               class="btn btn-sm btn-primary">
+                                Enter Course
+                            </a>
+                            <form method="post" action="{% url 'unenroll_course' course.id %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-sm btn-outline-danger">
+                                    Unenroll
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
