@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <title>student profile</title>
   <link rel="stylesheet" href="{% static 'css/teacher_style.css' %}">
-
+   
   <style>
     body {
       margin: 0;
@@ -81,7 +81,8 @@
           <input class="form-control" type="text" value="{{ request.user.username }}" disabled>
       </div>
         <input type="password" name="current_password" placeholder="Current Password" required>
-  
+      <p>Debug Update</p>
+
         <input type="email" name="new_email" placeholder="New Email">
         <input type="password" name="new_password" placeholder="New Password">
         <input type="password" name="confirm_password" placeholder="Confirm New Password">
