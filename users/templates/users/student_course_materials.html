@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h2>📚 All Course Materials</h2>
+
+  {% for enrollment in enrollments %}
+    <div class="card mb-4">
+      <div class="card-header bg-light">
+        <strong>{{ enrollment.course.title }}</strong> (Teacher: {{ enrollment.course.teacher.user.username }})
+      </div>
+      <div class="card-body">
+        <h5>🎧 Lesson Records</h5>
+        {% for record in records %}
+          {% if record.course == enrollment.course %}
+            <p>
+              <strong>{{ record.title }}</strong><br>
+              <a href="{{ record.file.url }}" target="_blank">Download/View</a>
+            </p>
+          {% endif %}
+        {% empty %}
+          <p>No lesson records.</p>
+        {% endfor %}
+
+        <hr>
+
+        <h5>📂 Section Contents</h5>
+        {% for content in contents %}
+          {% if content.section.course == enrollment.course %}
+            <p>
+              <strong>{{ content.title }}</strong> ({{ content.content_type }})<br>
+              {% if content.file %}
+                <a href="{{ content.file.url }}" target="_blank">📥 Download File</a>
+              {% elif content.video_url %}
+                <a href="{{ content.video_url }}" target="_blank">▶️ Watch Video</a>
+              {% elif content.audio_file %}
+                <a href="{{ content.audio_file.url }}" target="_blank">🎧 Listen</a>
+              {% elif content.external_link %}
+                <a href="{{ content.external_link }}" target="_blank">🔗 Visit Link</a>
+              {% else %}
+                {{ content.text_content }}
+              {% endif %}
+            </p>
+            <a href="{% url 'view_lesson_records' %}">🎧 View Lesson Records</a>
+
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+
+</div>
+{% endblock %}

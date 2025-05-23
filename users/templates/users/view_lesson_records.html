@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="container mt-4">
+    <h2>🎧 Lesson Records</h2>
+    <p>This is where lesson recordings will be shown.</p>
+
+    {% if records %}
+      <ul class="list-group">
+        {% for record in records %}
+          <li class="list-group-item">
+            <strong>{{ record.course.title }}:</strong> {{ record.title }}<br>
+            <a href="{{ record.file.url }}" target="_blank">📥 Download / View</a>
+            <span class="text-muted float-end">{{ record.upload_date|date:"Y-m-d H:i" }}</span>
+            <button type="submit" class="btn btn-primary mt-3">Save Changes</button>
+
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No lesson records available yet.</p>
+    {% endif %}
+    
+    <a href="{% url 'student_home' %}" class="btn btn-secondary mt-3">Back to Home</a>
+  </div>
+{% endblock %}

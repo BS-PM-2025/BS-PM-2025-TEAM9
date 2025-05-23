@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container" style="margin-top: 40px;">
+    <h2 style="margin-bottom: 20px;">📂 Available Assignments</h2>
+
+    {% if contents %}
+    <ul style="list-style-type: none; padding: 0;">
+        {% for item in contents %}
+        <li style="margin-bottom: 15px; background-color: #f9f9f9; padding: 15px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.05);">
+            <strong>{{ item.title }}</strong><br>
+            <span>📅 Available until: {{ item.available_until|date:"d/m/Y H:i" }}</span><br>
+            {% if item.file %}
+            <a href="{{ item.file.url }}" download style="color: #0066cc; font-weight: bold;">📥 Download</a>
+            {% else %}
+            <em>No file uploaded.</em>
+            {% endif %}
+        </li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No active assignments at the moment. Please check back later.</p>
+    {% endif %}
+</div>
+{% endblock %}

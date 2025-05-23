@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Teacher Dashboard{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
+        font-family: 'Segoe UI', sans-serif;
+        color: #fff;
+    }
+
+    .dashboard-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 60px;
+    }
+
+    .dashboard-content {
+        max-width: 50%;
+    }
+
+    .dashboard-content h1 {
+        font-size: 48px;
+        font-weight: bold;
+        margin-bottom: 20px;
+    }
+
+    .dashboard-content p {
+        font-size: 18px;
+        line-height: 1.6;
+        margin-bottom: 30px;
+        color: #e0e0e0;
+    }
+
+    .dashboard-buttons .btn {
+        padding: 12px 25px;
+        font-size: 16px;
+        font-weight: bold;
+        margin-right: 15px;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease-in-out;
+    }
+
+    .btn-primary {
+        background-color: #00bcd4;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #00acc1;
+    }
+
+    .btn-secondary {
+        background-color: transparent;
+        border: 2px solid #00bcd4;
+        color: #00bcd4;
+    }
+
+    .btn-secondary:hover {
+        background-color: #00bcd4;
+        color: white;
+    }
+
+    .illustration img {
+        max-width: 500px;
+        border-radius: 16px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    }
+</style>
+
+<div class="dashboard-container">
+    <div class="dashboard-content">
+        <h1>Welcome Back Teacher, {{ user.username|title }}!</h1>
+        <p>Manage your students, schedule lessons, and communicate easily. You're in control of your class management.</p>
+        <div class="dashboard-buttons">
+            <a href="{% url 'add_lesson' %}" class="btn btn-primary">➕ Add Lesson</a>
+            <a href="{% url 'view_students' %}" class="btn btn-secondary">👥 View Students</a>
+            <a href="{% url 'teacher_messages' %}" class="btn btn-primary">📨 Messages</a>
+            <a href="{% url 'edit_teacher_profile' %}" class="btn btn-secondary">✏️ Edit Profile</a>
+            <a href="{% url 'teacher_courses' %}" class="btn btn-primary">📚 My Courses</a>
+            <a href="{% url 'login' %}">🔒 Logout</a>
+        </div>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'teacher_home' %}">Home</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="illustration">
+        <img src="{% static 'images/teacher_dashboard.png' %}" alt="Teacher Illustration">
+    </div>
+</div>
+{% endblock %}

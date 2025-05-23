@@ -1,0 +1,227 @@
+{% extends 'base.html' %}
+{% load course_tags %}
+
+{% block title %}Edit {{ content.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="mb-0">
+                            <i class="fas fa-edit me-2"></i>Edit Content: {{ content.title }}
+                        </h3>
+                        <span class="badge bg-light text-dark">{{ content.section.course.learning_level }}</span>
+                    </div>
+                    <p class="mb-0 mt-2">
+                        <strong>Course:</strong> {{ content.section.course.title }} | 
+                        <strong>Section:</strong> {{ content.section.title }}
+                    </p>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" id="content-form">
+                        {% csrf_token %}
+                        
+                        <!-- Content Type Display (readonly) -->
+                        <div class="mb-4">
+                            <label class="form-label">Content Type</label>
+                            <div class="p-3 bg-light rounded">
+                                <i class="fas fa-{{ content.content_type|content_type_icon }} me-2"></i>
+                                {{ content.get_content_type_display }}
+                            </div>
+                        </div>
+
+                        <!-- Common Fields -->
+                        <div class="mb-3">
+                            <label for="{{ form.title.id_for_label }}" class="form-label">Title</label>
+                            {{ form.title }}
+                            {% if form.title.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.title.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="{{ form.order.id_for_label }}" class="form-label">Order</label>
+                            {{ form.order }}
+                            <small class="form-text text-muted">Display order in this section (lower numbers appear first)</small>
+                            {% if form.order.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.order.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+
+                        <!-- Dynamic Content Fields -->
+                        {% if content.content_type == 'text' %}
+                        <div class="mb-3">
+                            <label for="{{ form.text_content.id_for_label }}" class="form-label">Text Content</label>
+                            {{ form.text_content }}
+                            {% if form.text_content.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.text_content.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        {% if content.content_type == 'file' %}
+                        <div class="mb-3">
+                            <label class="form-label">Current File</label>
+                            {% if content.file %}
+                                <div class="p-3 bg-light rounded mb-3">
+                                    <a href="{{ content.file.url }}" target="_blank">{{ content.file.name|cut:"course_contents/" }}</a>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" name="file-clear" id="file-clear">
+                                    <label class="form-check-label" for="file-clear">Remove current file</label>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No file currently uploaded</p>
+                            {% endif %}
+                            <label for="{{ form.file.id_for_label }}" class="form-label">New File</label>
+                            {{ form.file }}
+                            <small class="form-text text-muted">Leave blank to keep current file</small>
+                            {% if form.file.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.file.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        {% if content.content_type == 'video' %}
+                        <div class="mb-3">
+                            <label for="{{ form.video_url.id_for_label }}" class="form-label">Video URL</label>
+                            {{ form.video_url }}
+                            {% if form.video_url.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.video_url.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        {% if content.content_type == 'audio' %}
+                        <div class="mb-3">
+                            <label class="form-label">Current Audio File</label>
+                            {% if content.audio_file %}
+                                <div class="p-3 bg-light rounded mb-3">
+                                    <audio controls>
+                                        <source src="{{ content.audio_file.url }}" type="audio/mpeg">
+                                    </audio>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="checkbox" name="audio_file-clear" id="audio_file-clear">
+                                    <label class="form-check-label" for="audio_file-clear">Remove current audio file</label>
+                                </div>
+                            {% else %}
+                                <p class="text-muted">No audio file currently uploaded</p>
+                            {% endif %}
+                            <label for="{{ form.audio_file.id_for_label }}" class="form-label">New Audio File</label>
+                            {{ form.audio_file }}
+                            <small class="form-text text-muted">Leave blank to keep current audio file</small>
+                            {% if form.audio_file.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.audio_file.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        {% if content.content_type == 'assignment' %}
+                        <div class="mb-3">
+                            <label for="{{ form.assignment_instructions.id_for_label }}" class="form-label">Instructions</label>
+                            {{ form.assignment_instructions }}
+                            {% if form.assignment_instructions.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.assignment_instructions.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ form.assignment_due_date.id_for_label }}" class="form-label">Due Date</label>
+                            {{ form.assignment_due_date }}
+                            {% if form.assignment_due_date.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.assignment_due_date.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        {% if content.content_type == 'link' %}
+                        <div class="mb-3">
+                            <label for="{{ form.external_link.id_for_label }}" class="form-label">External Link</label>
+                            {{ form.external_link }}
+                            {% if form.external_link.errors %}
+                                <div class="invalid-feedback d-block">
+                                    {{ form.external_link.errors|join:", " }}
+                                </div>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="{% url 'course_detail' content.section.course.id %}" class="btn btn-secondary me-md-2">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 12px;
+        overflow: hidden;
+        border: none;
+    }
+    .card-header {
+        padding: 1.5rem;
+    }
+    .card-body {
+        padding: 2rem;
+    }
+    .form-control, .form-select {
+        padding: 12px 15px;
+        border-radius: 8px;
+        border: 1px solid #e0e0e0;
+        transition: all 0.3s;
+    }
+    .form-control:focus, .form-select:focus {
+        border-color: #4a90e2;
+        box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+    }
+    textarea.form-control {
+        min-height: 150px;
+    }
+    .badge {
+        font-size: 0.9rem;
+        padding: 5px 10px;
+        border-radius: 50px;
+    }
+    audio {
+        width: 100%;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize datetime picker for assignment due date
+        const dueDateField = document.getElementById('id_assignment_due_date');
+        if (dueDateField) {
+            dueDateField.type = 'datetime-local';
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+<div class="container" style="margin-top: 40px;">
+    <h2>Welcome, {{ request.user.username }} (Teacher)</h2>
+
+    <div class="dashboard-menu" style="background-color: #f2f2f2; border-radius: 12px; padding: 25px; box-shadow: 0 0 10px rgba(0,0,0,0.1); margin-top: 20px;">
+        <h3 style="color: #333;">📁 Upload Options</h3>
+        <ul style="list-style-type: none; padding: 0;">
+            <li style="margin: 10px 0;">
+                <a href="{% url 'upload_timeline' %}" style="text-decoration: none; color: #0066cc; font-weight: bold;">🕒 Upload Course Timeline</a>
+            </li>
+            <li style="margin: 10px 0;">
+                <a href="{% url 'upload_recording' %}" style="text-decoration: none; color: #0066cc; font-weight: bold;">🎥 Upload Recorded Lesson</a>
+            </li>
+            <li style="margin: 10px 0;">
+                <a href="{% url 'upload_material' %}" style="text-decoration: none; color: #0066cc; font-weight: bold;">📂 Upload Course Files (Homeworks, Summaries, Lectures)</a>
+            </li>
+        </ul>
+    </div>
+
+    <div style="margin-top: 40px;">
+        <h3>📊 Quick Summary</h3>
+        <p>Here you can upload teaching materials, manage your course files and help your students succeed.</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,12 @@
+<h2>Send Message to a Student</h2>
+<form method="POST">
+    {% csrf_token %}
+    <label>Select Student:</label>
+    <select name="student_id">
+        {% for s in students %}
+        <option value="{{ s.user.id }}">{{ s.user.username }}</option>
+        {% endfor %}
+    </select><br><br>
+    <textarea name="message" placeholder="Write your message here..." rows="4" cols="50"></textarea><br><br>
+    <button type="submit">Send</button>
+</form>

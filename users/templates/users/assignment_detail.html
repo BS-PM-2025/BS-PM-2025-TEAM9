@@ -1,0 +1,64 @@
+{% extends 'student/base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+            <h2 class="mb-0">Assignment: {{ assignment.content.title }}</h2>
+        </div>
+        <div class="card-body">
+            <div class="mb-4">
+                <h4>Course: {{ assignment.content.section.course.title }}</h4>
+                <p class="text-muted">Due: {{ assignment.deadline|date:"M d, Y H:i" }}</p>
+                {% if is_past_due and not submission %}
+                    <div class="alert alert-danger">This assignment is past due</div>
+                {% endif %}
+            </div>
+            
+            <div class="mb-4 p-3 bg-light rounded">
+                <h5>Instructions:</h5>
+                {{ assignment.content.assignment_instructions|linebreaks }}
+            </div>
+            
+            {% if submission %}
+            <div class="mb-4 p-3 bg-light rounded">
+                <h5>Your Submission</h5>
+                <p>Submitted on: {{ submission.submitted_at|date:"M d, Y H:i" }}</p>
+                {% if submission.submitted_file %}
+                    <p>File: <a href="{{ submission.submitted_file.url }}" target="_blank">{{ submission.submitted_file.name|cut:"submissions/" }}</a></p>
+                {% endif %}
+                {% if submission.submission_text %}
+                    <div class="p-2 bg-white rounded">
+                        {{ submission.submission_text|linebreaks }}
+                    </div>
+                {% endif %}
+                
+                {% if submission.grade is not None %}
+                <div class="mt-3 p-3 bg-white rounded">
+                    <h6>Feedback:</h6>
+                    <p>Grade: {{ submission.grade }}/{{ assignment.max_points }}</p>
+                    {% if submission.feedback %}
+                        <div class="p-2 bg-light rounded">
+                            {{ submission.feedback|linebreaks }}
+                        </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+            {% else %}
+            {% if is_past_due %}
+                <div class="alert alert-warning">Submissions are no longer being accepted for this assignment</div>
+            {% else %}
+                <h5 class="mb-3">Submit Your Work</h5>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Submit Assignment</button>
+                    <a href="{% url 'assignment_list' %}" class="btn btn-secondary">Cancel</a>
+                </form>
+            {% endif %}
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

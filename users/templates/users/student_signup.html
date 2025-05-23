@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Signup - DevMaster</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f4f8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+        }
+        .form-container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            width: 400px;
+        }
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #007acc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #005f99;
+        }
+    </style>
+</head>
+<body>
+<div class="form-container">
+    <h2>Create Your Account</h2>
+    <form method="post">
+        {% csrf_token %}
+
+        <!-- User Form -->
+        {{ user_form.username.label_tag }}
+        {{ user_form.username }}
+
+        {{ user_form.email.label_tag }}
+        {{ user_form.email }}
+
+        {{ user_form.password.label_tag }}
+        {{ user_form.password }}
+
+        {{ user_form.confirm_password.label_tag }}
+        {{ user_form.confirm_password }}
+
+        {{ user_form.profile.label_tag }}
+        {{ user_form.profile }}
+
+        <!-- Student Bio -->
+        {{ profile_form.bio.label_tag }}
+        {{ profile_form.bio }}
+
+        <!-- Docker Knowledge (בהתחלה מוסתר) -->
+        <div id="docker-question" style="display: none;">
+            {{ profile_form.docker_knowledge.label_tag }}
+            {{ profile_form.docker_knowledge }}
+        </div>
+
+        <button type="submit">Sign Up</button>
+    </form>
+</div>
+
+<script>
+    const profileSelect = document.querySelector('select[name="profile"]');
+    const dockerQuestion = document.getElementById('docker-question');
+
+    function toggleDockerQuestion() {
+        if (profileSelect.value.toLowerCase() === 'student') {
+            dockerQuestion.style.display = 'block';
+        } else {
+            dockerQuestion.style.display = 'none';
+        }
+    }
+
+    // Check immediately + on change
+    toggleDockerQuestion();
+    profileSelect.addEventListener('change', toggleDockerQuestion);
+</script>
+</body>
+</html>
