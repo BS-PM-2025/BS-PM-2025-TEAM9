@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Student Dashboard</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -11,100 +11,227 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #0f0f2b;
+            background: linear-gradient(to right, #c2f0f7, #f9c2d2);
+        }
+        .sidebar {
+            width: 200px;
+            height: 100vh;
+            background-color: #2c3e50;
+            position: fixed;
             color: white;
-        }
-        header {
-            background-color: white;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 30px;
-        }
-        .nav-left a {
-            margin: 0 10px;
-            text-decoration: none;
-            font-weight: bold;
-            color: black;
-        }
-        .nav-left a.active {
-            color: #695bff;
-        }
-        .nav-right a {
-            margin-left: 20px;
-            text-decoration: none;
-            font-weight: bold;
-            color: black;
-        }
-        .nav-right a:hover {
-            color: #695bff;
-        }
-        .logo {
-            font-size: 24px;
-            font-weight: bold;
-        }
-        .logo span {
-            color: #695bff;
-        }
-        .dashboard-header {
-            text-align: center;
-            padding: 40px 0 20px;
-            background-color: #1a1832;
-        }
-        .dashboard-header h2 {
-            font-size: 36px;
-            font-weight: bold;
-            color: white;
-        }
-        .search-bar {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-        }
-        .search-bar input[type="text"] {
-            padding: 10px;
-            width: 300px;
-            border-radius: 20px;
-            border: none;
-            outline: none;
-            font-size: 16px;
-            padding-left: 40px;
-        }
-        .search-bar i {
-            position: relative;
-            left: 30px;
-            top: 10px;
-            color: #999;
-        }
-        .content {
-            background-color: #0f0f2b;
+            flex-direction: column;
             padding: 20px;
+        }
+        .sidebar a {
+            color: white;
+            text-decoration: none;
+            margin: 10px 0;
+            transition: all 0.3s;
+        }
+        .sidebar a:hover {
+            color: #f8f9fa;
+            transform: translateX(5px);
+        }
+        .main {
+            margin-left: 220px;
+            padding: 30px;
+        }
+        .dashboard-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.3s;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+        }
+        .level-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+            max-width: 400px;
+        }
+        .level-card:hover {
+            transform: scale(1.05);
+        }
+        h2, h3 {
+            color: #34495e;
+        }
+        .badge {
+            font-size: 0.75rem;
+        }
+        .assignment-status {
+            font-weight: 500;
+        }
+        .submitted {
+            color: #28a745;
+        }
+        .pending {
+            color: #dc3545;
+        }
+        .late {
+            color: #ffc107;
+        }
+        .message-item {
+            border-left: 3px solid #4a90e2;
+            padding-left: 10px;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="nav-left">
-            <a href="#" class="active">MY Courses</a>
-            <a href="#">about us </a>
-        </div>
-        <div class="logo"><span>DEVMASTER</span></div>
-        <div class="nav-right">
-            <a href="{% url 'edit_student_profile' %}"><i class="fas fa-user"></i> Profile</a>
-            <a href="{% url 'login' %}"><i class="fas fa-sign-out-alt"></i> Exit</a>
-        </div>
-    </header>
+    <div class="sidebar">
+        
+        <h2 class="mb-4">Student Portal</h2>
+        <a href="{% url 'assignment_list' %}"><i class="fas fa-tasks me-2"></i>Assignments</a>
+        <a href="{% url 'view_grades' %}"><i class="fas fa-chart-line me-2"></i>Grades</a>
+        <a href="{% url 'edit_student_profile' %}"><i class="fas fa-user me-2"></i>Profile</a>
+        <a href="{% url 'view_lesson_records' %}" class="btn btn-info">📂 Lesson Records</a>
+        <a href="{% url 'student_course_materials' %}" class="btn btn-success">📚 All Course Materials</a>
+        <a href="{% url 'login' %}"><i class="fas fa-sign-out-alt me-2"></i>Logout</a>
 
-    <div class="dashboard-header">
-        <h2>My Courses </h2>
-        <div class="search-bar">
-            <i class="fas fa-search"></i>
-            <input type="text" placeholder="חיפוש קורסים">
+    </div>
+
+    <div class="main">
+        <!-- Welcome Section -->
+        <div class="dashboard-card">
+            <h2>Welcome back, {{ request.user.username }}!</h2>
+            <p class="text-muted">Here's what's happening with your courses today</p>
+        </div>
+
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2><i class="fas fa-book me-2"></i>Your Courses</h2>
+                <a href="{% url 'course_list' %}" class="btn btn-sm btn-outline-primary">
+                    Browse Available Courses
+                </a>
+            </div>
+            {% if enrollments %}
+                <div class="row mt-3">
+                    {% for enrollment in enrollments %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card h-100">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ enrollment.course.title }}</h5>
+                                <p class="card-text text-muted">{{ enrollment.course.description|truncatewords:15 }}</p>
+                                <a href="{% url 'student_course_content' enrollment.course.id %}" class="btn btn-sm btn-primary">
+                                    View Course
+                                </a>
+                                
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    You are not enrolled in any courses yet.
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Calendar Section -->
+        <div class="dashboard-card">
+            <h2><i class="far fa-calendar-alt me-2"></i>Weekly Calendar</h2>
+            <div class="mt-3">
+                <!-- Placeholder for calendar integration -->
+                <img src="https://via.placeholder.com/800x200?text=Calendar+View" alt="Calendar" class="img-fluid rounded">
+            </div>
+        </div>
+
+
+
+        {% comment %} <!-- Assignments Overview Section -->
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2><i class="fas fa-tasks me-2"></i>Recent Assignments</h2>
+                <a href="{% url 'assignment_list' %}" class="btn btn-sm btn-outline-primary">View All</a>
+            </div>
+            
+            {% if recent_assignments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Assignment</th>
+                                <th>Course</th>
+                                <th>Due Date</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for assignment in recent_assignments %}
+                            <tr onclick="window.location='{% url ' assignment_detail' assignment.id %}'" style="cursor: pointer;"> 
+                                <td>{{ assignment.content.title }}</td>
+                                <td>{{ assignment.content.section.course.title }}</td>
+                                <td>
+                                    {{ assignment.deadline|date:"M d, Y H:i" }}
+                                    {% if assignment.is_past_due %}<span class="badge bg-danger ms-2">Past Due</span>{% endif %}
+                                </td>
+                                <td>
+                                    {% if assignment.submission %}
+                                        <span class="assignment-status submitted">
+                                            <i class="fas fa-check-circle me-1"></i>Submitted
+                                            {% if assignment.submission.is_late %}<span class="badge bg-warning text-dark ms-2">Late</span>{% endif %}
+                                        </span>
+                                    {% else %}
+                                        <span class="assignment-status pending">
+                                            <i class="fas fa-exclamation-circle me-1"></i>Pending
+                                        </span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    You don't have any assignments due soon.
+                </div>
+            {% endif %}
+        </div> {% endcomment %}
+
+        <!-- Messages Section -->
+        <div class="dashboard-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h2><i class="fas fa-envelope me-2"></i>Recent Messages</h2>
+                <a href="#" class="btn btn-sm btn-outline-primary">View All</a>
+
+            </div>
+            
+            {% if messages %}
+                <ul>
+                    {% for msg in messages %}
+                        <li><strong>{{ msg.sender.username }}:</strong> {{ msg.content }} <em>({{ msg.timestamp|date:'d M H:i' }})</em></li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p>No messages yet. You can send and receive messages here.</p>
+            {% endif %}
         </div>
     </div>
 
-    <div class="content">
-        <!-- כאן תכניס את כרטיסיות הקורסים -->
-    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Simple script to highlight current page in sidebar
+        document.addEventListener('DOMContentLoaded', function() {
+            const currentUrl = window.location.pathname;
+            const links = document.querySelectorAll('.sidebar a');
+            
+            links.forEach(link => {
+                if (link.getAttribute('href') === currentUrl) {
+                    link.style.color = '#f8f9fa';
+                    link.style.fontWeight = 'bold';
+                }
+            });
+        });
+    </script>
 </body>
 </html>

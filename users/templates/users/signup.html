@@ -1,127 +1,106 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Sign Up | DevMaster</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background-color: #0f0f2b;
-            font-family: 'Segoe UI', sans-serif;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
+  <meta charset="UTF-8">
+  <title>Sign Up | hApp</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: url("{% static 'users/img/welcomeBG.jpg' %}") no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
 
-        .container {
-            background-color: #14142f;
-            padding: 50px;
-            border-radius: 12px;
-            width: 400px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.3);
-        }
+    .signup-card {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 20px;
+      padding: 40px;
+      width: 380px;
+      color: white;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
 
-        h1 {
-            text-align: center;
-            color: #ffffff;
-            font-size: 24px;
-            margin-bottom: 30px;
-        }
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 600;
+      color: #fff;
+    }
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-            color: #ccc;
-            font-size: 13px;
-        }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
 
-        input, select {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 20px;
-            border: none;
-            border-radius: 5px;
-            background-color: #1e1e3f;
-            color: white;
-        }
+    label {
+      margin-bottom: 6px;
+      font-size: 14px;
+    }
 
-        input::placeholder {
-            color: #aaa;
-        }
+    input, select {
+      padding: 12px;
+      margin-bottom: 20px;
+      border: none;
+      border-radius: 10px;
+      font-size: 15px;
+      outline: none;
+      background: rgba(255, 255, 255, 0.9);
+      color: #333;
+    }
 
-        select {
-            background-color: #1e1e3f;
-        }
+    button {
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      background-color: #00b4db;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+      transition: 0.3s ease;
+    }
 
-        button {
-            width: 100%;
-            background-color: #634fff;
-            color: white;
-            padding: 12px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            cursor: pointer;
-            font-size: 14px;
-        }
+    button:hover {
+      background-color: #0083b0;
+    }
 
-        button:hover {
-            background-color: #7c61ff;
-        }
+    .back-link {
+      text-align: center;
+      margin-top: 15px;
+    }
 
-        .logo {
-            position: absolute;
-            top: 30px;
-            left: 30px;
-            font-size: 24px;
-            font-weight: bold;
-            color: white;
-        }
+    .back-link a {
+      color: #ffffff;
+      text-decoration: underline;
+      font-size: 14px;
+    }
 
-        .logo span {
-            color: #634fff;
-        }
-    </style>
+    @media (max-width: 500px) {
+      .signup-card {
+        width: 90%;
+        padding: 30px;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="logo">DEV<span>MASTER</span></div>
-    <div class="container">
-        <h1>CREATE USER</h1>
-        <form method="post">
-            {% csrf_token %}
-            <label>Username *</label>
-            <input type="text" name="username" placeholder="Enter username" required>
-
-            <label>Password *</label>
-            <input type="password" name="password" required>
-
-            <label>Confirm Password *</label>
-            <input type="password" name="confirm_password" required>
-
-            <label>Email Address *</label>
-            <input type="email" name="email" required>
-
-            <label>Profile</label>
-            <select name="profile">
-                <option value="student">Student</option>
-                <option value="teacher">Teacher</option>
-            </select>
-
-            <label>Level *</label>
-            <select name="level">
-                <option value="beginner">Beginner</option>
-                <option value="beginner">Intermediate</option>
-                <option value="advanced">Advanced</option>
-            </select>
-
-            <label>Academic Knowledge *</label>
-            <input type="text" name="academic_knowledge" placeholder="e.g. Python, Math" required>
-
-            <button type="submit">SIGN UP</button>
-        </form>
+  <div class="signup-card">
+    <h2>Create Your Account</h2>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Sign Up</button>
+    </form>
+    <div class="back-link">
+      <a href="{% url 'login' %}">← NEXT</a>
     </div>
+  </div>
 </body>
 </html>
