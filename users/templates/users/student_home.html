@@ -167,7 +167,7 @@
                         </thead>
                         <tbody>
                             {% for assignment in recent_assignments %}
-                            <tr onclick="window.location='{% url ' assignment_detail' assignment.id %}'" style="cursor: pointer;"> 
+                            <tr onclick="window.location='{% url 'assignment_detail' assignment.id %}'" style="cursor: pointer;">
                                 <td>{{ assignment.content.title }}</td>
                                 <td>{{ assignment.content.section.course.title }}</td>
                                 <td>
