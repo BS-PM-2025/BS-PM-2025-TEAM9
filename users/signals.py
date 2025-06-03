@@ -11,6 +11,6 @@ def create_assignment_for_section_content(sender, instance, created, **kwargs):
         if instance.content_type == 'assignment':
             Assignment.objects.create(
                 content=instance,
-                instructions=instance.assignment_instructions,
-                due_date=instance.assignment_due_date
+                # instructions=instance.assignment_instructions,
+                deadline=instance.assignment_due_date
             )

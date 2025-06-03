@@ -1,54 +1,130 @@
-{% extends 'student/base.html' %}
+{% extends 'base.html' %}
+{% block title %}Submission - {{ submission.assignment.content.title }}{% endblock %}
 
 {% block content %}
 <div class="container py-5">
-    <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-            <h2 class="mb-0">Submission Details</h2>
-        </div>
-        <div class="card-body">
-            <div class="mb-4">
-                <h4>Assignment: {{ submission.assignment.content.title }}</h4>
-                <p class="text-muted">Course: {{ submission.assignment.content.section.course.title }}</p>
+    <div class="card">
+        <div class="card-header">
+            <div class="d-flex justify-content-between align-items-center">
+                <h2 class="mb-0">{{ submission.assignment.content.title }}</h2>
+                <a href="{% url 'view_grades' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Back to All Submissions
+                </a>
             </div>
-            
-            <div class="mb-4 p-3 bg-light rounded">
-                <h5>Your Submission</h5>
-                <p>Submitted on: {{ submission.submitted_at|date:"M d, Y H:i" }}</p>
+            <div class="mt-2">
+                <span class="badge bg-primary">
+                    {{ submission.assignment.content.section.course.title }}
+                </span>
+                <span class="badge 
+                    {% if submission.status == 'graded' %}bg-success
+                    {% elif submission.status == 'late' %}bg-warning
+                    {% elif submission.status == 'submitted' %}bg-primary
+                    {% else %}bg-secondary{% endif %} ms-2">
+                    {{ submission.get_status_display }}
+                </span>
                 {% if submission.is_late %}
-                    <span class="badge bg-warning">Submitted Late</span>
+                    <span class="badge bg-danger ms-2">Late</span>
                 {% endif %}
-                
-                {% if submission.submitted_file %}
-                    <p>File: <a href="{{ submission.submitted_file.url }}" target="_blank">{{ submission.submitted_file.name|cut:"submissions/" }}</a></p>
-                {% endif %}
-                
-                {% if submission.submission_text %}
-                    <div class="p-2 bg-white rounded">
-                        {{ submission.submission_text|linebreaks }}
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Assignment Details</h5>
+                    <div class="p-3 bg-light rounded">
+                        <p><strong>Due Date:</strong> {{ submission.assignment.deadline|date:"M d, Y H:i" }}</p>
+                        <p><strong>Submitted:</strong> {{ submission.submitted_at|date:"M d, Y H:i"|default:"Not submitted" }}</p>
+                        {% if submission.grade %}
+                            <p><strong>Grade:</strong> 
+                                {{ submission.grade }}/{{ submission.assignment.max_points }}
+                                ({{ submission.points_percentage|floatformat:1 }}%)
+                            </p>
+                        {% endif %}
                     </div>
-                {% endif %}
+                </div>
+                
+                <div class="col-md-6">
+                    <h5>Instructions</h5>
+                    <div class="p-3 bg-light rounded">
+                        {{ submission.assignment.content.assignment_instructions|linebreaks }}
+                    </div>
+                </div>
             </div>
             
-            {% if submission.grade is not None %}
-            <div class="p-3 bg-light rounded">
-                <h5>Feedback</h5>
-                <p>Grade: {{ submission.grade }}/{{ submission.assignment.max_points }}</p>
-                {% if submission.feedback %}
-                    <div class="p-2 bg-white rounded">
-                        {{ submission.feedback|linebreaks }}
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>My Submission</h5>
+                    <div class="p-3 bg-light rounded">
+                        {% if submission.submitted_file %}
+                            <p>
+                                <a href="{{ submission.submitted_file.url }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-download"></i> Download Submitted File
+                                </a>
+                            </p>
+                            <p class="text-muted">
+                                <small>File: {{ submission.submitted_file.name|cut:"staticfiles/users/submissions/" }}</small>
+                            </p>
+                        {% endif %}
+                        
+                        {% if submission.submission_text %}
+                            <div class="mt-3 p-3 bg-white rounded">
+                                {{ submission.submission_text|linebreaks }}
+                            </div>
+                        {% endif %}
+                        
+                        {% if not submission.submitted_file and not submission.submission_text %}
+                            <p class="text-muted">No submission content available</p>
+                        {% endif %}
                     </div>
-                {% endif %}
+                </div>
+                
+                <div class="col-md-6">
+                    <h5>Feedback</h5>
+                    <div class="p-3 bg-light rounded">
+                        {% if submission.feedback %}
+                            <div class="mb-3">
+                                {% if submission.grade %}
+                                    <div class="progress mb-2" style="height: 20px;">
+                                        <div class="progress-bar bg-success" role="progressbar" 
+                                            style="width: {{ submission.points_percentage }}%" 
+                                            aria-valuenow="{{ submission.points_percentage }}" 
+                                            aria-valuemin="0" 
+                                            aria-valuemax="100">
+                                            {{ submission.points_percentage|floatformat:1 }}%
+                                        </div>
+                                    </div>
+                                {% endif %}
+                                
+                                <div class="p-3 bg-white rounded">
+                                    {{ submission.feedback|linebreaks }}
+                                </div>
+                            </div>
+                            
+                            {% if submission.teacher_notes %}
+                                <h6>Teacher Notes:</h6>
+                                <div class="p-3 bg-white rounded">
+                                    {{ submission.teacher_notes|linebreaks }}
+                                </div>
+                            {% endif %}
+                        {% else %}
+                            {% if submission.status == 'graded' %}
+                                <p class="text-muted">No feedback provided</p>
+                            {% else %}
+                                <p class="text-muted">Waiting for grading</p>
+                            {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
             </div>
-            {% else %}
-            <div class="alert alert-info">
-                Your submission hasn't been graded yet.
-            </div>
+            
+            {% if submission.status != 'graded' %}
+                <div class="text-end">
+                    <a href="{% url 'submit_assignment' submission.assignment.id %}" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Edit Submission
+                    </a>
+                </div>
             {% endif %}
-            
-            <div class="mt-4">
-                <a href="{% url 'assignment_list' %}" class="btn btn-primary">Back to Assignments</a>
-            </div>
         </div>
     </div>
 </div>

@@ -1,0 +1,67 @@
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th>Assignment</th>
+                <th>Course</th>
+                <th>Status</th>
+                <th>Submitted</th>
+                <th>Grade</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for submission in submissions %}
+            <tr>
+                <td>{{ submission.assignment.content.title }}</td>
+                <td>{{ submission.assignment.content.section.course.title }}</td>
+                <td>
+                    <span class="badge 
+                        {% if submission.status == 'graded' %}bg-success
+                        {% elif submission.status == 'late' %}bg-warning
+                        {% elif submission.status == 'submitted' %}bg-primary
+                        {% else %}bg-secondary{% endif %}">
+                        {{ submission.get_status_display }}
+                    </span>
+                </td>
+                <td>
+                    {% if submission.submitted_at %}
+                        {{ submission.submitted_at|date:"M d, Y H:i" }}
+                    {% else %}
+                        Draft
+                    {% endif %}
+                </td>
+                <td>
+                    {% if submission.grade is not None %}
+                        {{ submission.grade }}/{{ submission.assignment.max_points }}
+                    {% else %}
+                        {% if submission.status == 'submitted' or submission.status == 'late' %}
+                            <span class="text-muted">Pending</span>
+                        {% else %}
+                            -
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td>
+                    <a href="{% url 'view_submission' submission.id %}" class="btn btn-sm btn-outline-primary">
+                        <i class="fas fa-eye"></i> View
+                    </a>
+                    {% if submission.status != 'graded' %}
+                        <a href="{% url 'submit_assignment' submission.assignment.id %}" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-edit"></i> Edit
+                        </a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6" class="text-center py-4">
+                    <div class="alert alert-info mb-0">
+                        No submissions found
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

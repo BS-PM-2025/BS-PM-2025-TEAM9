@@ -3,6 +3,13 @@ from django import template
 register = template.Library()
 
 @register.filter
+def get_submission_for(submissions, student):
+    try:
+        return submissions.get(student=student)
+    except Submission.DoesNotExist:
+        return None
+        
+@register.filter
 def content_type_icon(content_type):
     icon_map = {
         'text': 'file-alt',

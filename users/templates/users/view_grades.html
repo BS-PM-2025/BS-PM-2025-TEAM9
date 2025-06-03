@@ -1,13 +1,101 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Your Grades</title>
-</head>
-<body>
-  <h1>Your Grades</h1>
-  <p>🎓 This is where student grades will appear.</p>
-  <a href="{% url 'student_home' %}">Back to Home</a>
-  <a href="{% url 'view_grades' %}" class="btn">📚 View Grades</a>
+{% extends 'base.html' %}
+{% block title %}My Grades - {{ course.title }}{% endblock %}
 
-</body>
-</html>
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>My Grades for {{ course.title }}</h1>
+        <a href="{% url 'student_course_detail' course.id %}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Course
+        </a>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            {% if assignments %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Assignment</th>
+                                <th>Section</th>
+                                <th>Status</th>
+                                <th>Grade</th>
+                                <th>Feedback</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in assignments %}
+                            <tr>
+                                <td>{{ item.assignment.content.title }}</td>
+                                <td>{{ item.section.title }}</td>
+                                <td>
+                                    {% if item.submission %}
+                                        <span class="badge 
+                                            {% if item.submission.status == 'graded' %}bg-success
+                                            {% elif item.submission.status == 'late' %}bg-warning
+                                            {% elif item.submission.status == 'submitted' %}bg-primary
+                                            {% else %}bg-secondary{% endif %}">
+                                            {{ item.submission.get_status_display }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Not Submitted</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.submission and item.submission.grade is not None %}
+                                        {{ item.submission.grade }}/{{ item.assignment.max_points }}
+                                        ({{ item.submission.points_percentage|floatformat:1 }}%)
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if item.submission and item.submission.feedback %}
+                                        <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" 
+                                            data-bs-target="#feedbackModal{{ forloop.counter }}">
+                                            View Feedback
+                                        </button>
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="alert alert-info">
+                    No assignments in this course yet.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Feedback Modals -->
+{% for item in assignments %}
+    {% if item.submission and item.submission.feedback %}
+    <div class="modal fade" id="feedbackModal{{ forloop.counter }}" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Feedback for {{ item.assignment.content.title }}</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6>Grade: {{ item.submission.grade }}/{{ item.assignment.max_points }}</h6>
+                    <div class="p-3 bg-light rounded mt-3">
+                        {{ item.submission.feedback|linebreaks }}
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block title %}Submit Assignment - {{ assignment.content.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card">
+        <div class="card-header">
+            <h2>{{ assignment.content.title }}</h2>
+            <p class="mb-0">Due: {{ assignment.deadline }}</p>
+            {% if is_late %}
+                <span class="badge bg-danger">Late Submission</span>
+            {% endif %}
+        </div>
+        <div class="card-body">
+            <h5>Instructions:</h5>
+            <div class="p-3 bg-light rounded mb-4">
+                {{ assignment.content.assignment_instructions|linebreaks }}
+            </div>
+            
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {{ form.as_p }}
+                
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="submit" name="save_draft" class="btn btn-outline-primary">
+                        <i class="fas fa-save"></i> Save Draft
+                    </button>
+                    <button type="submit" name="submit_final" class="btn btn-primary">
+                        <i class="fas fa-paper-plane"></i> Submit Final
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
