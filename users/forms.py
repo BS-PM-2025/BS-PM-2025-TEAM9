@@ -158,18 +158,83 @@ class SubmissionForm(forms.ModelForm):
         model = Submission
         fields = ['submitted_file', 'submission_text']
         widgets = {
-            'submission_text': forms.Textarea(attrs={'rows': 4}),
+            'submission_text': forms.Textarea(attrs={'rows': 10}),
         }
         labels = {
             'submitted_file': 'Upload your work',
             'submission_text': 'Or write your submission here'
         }
 
+        def clean(self):
+            cleaned_data = super().clean()
+            submitted_file = cleaned_data.get('submitted_file')
+            submission_text = cleaned_data.get('submission_text')
+            
+            # Validate at least one submission method is provided
+            if not submitted_file and not submission_text:
+                raise forms.ValidationError("You must provide either a file or text submission.")
+            
+            return cleaned_data
+
 class EnrollmentForm(forms.ModelForm):
     class Meta:
         model = Enrollment
         fields = [] 
 
+
+# forms.py
+
+class GradeSubmissionForm(forms.ModelForm):
+    class Meta:
+        model = Submission
+        fields = ['grade', 'feedback', 'teacher_notes']
+        widgets = {
+            'feedback': forms.Textarea(attrs={'rows': 5}),
+            'teacher_notes': forms.Textarea(attrs={'rows': 3}),
+        }
+    
+    def clean_grade(self):
+        grade = self.cleaned_data['grade']
+        max_points = self.instance.assignment.max_points
+        
+        if grade is not None and grade > max_points:
+            raise forms.ValidationError(f"Grade cannot exceed maximum points ({max_points})")
+        
+        return grade
+    
+    
+class SubmitAssignmentForm(forms.ModelForm):
+    class Meta:
+        model = Submission
+        fields = ['submitted_file', 'submission_text']
+        widgets = {
+            'submission_text': forms.Textarea(attrs={
+                'rows': 10,
+                'placeholder': 'Type your submission here...'
+            }),
+        }
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        assignment = kwargs.get('instance').assignment if kwargs.get('instance') else None
+        
+        if assignment:
+            if assignment.submission_types == 'file':
+                self.fields['submission_text'].widget = forms.HiddenInput()
+            elif assignment.submission_types == 'text':
+                self.fields['submitted_file'].widget = forms.HiddenInput()
+    
+    def clean(self):
+        cleaned_data = super().clean()
+        submitted_file = cleaned_data.get('submitted_file')
+        submission_text = cleaned_data.get('submission_text', '').strip()
+        
+        if not submitted_file and not submission_text:
+            raise forms.ValidationError("You must provide either a file or text submission.")
+        
+        return cleaned_data
+
+        
 from .models import LessonRecord
 
 class LessonRecordForm(forms.ModelForm):

@@ -15,6 +15,11 @@ urlpatterns = [
     path('teacher/upload-timeline/', views.upload_timeline, name='upload_timeline'),
     path('teacher/upload-recording/', views.upload_recording, name='upload_recording'),
     path('lesson-records/', views.view_lesson_records, name='view_lesson_records'),
+     path('assignment/<int:assignment_id>/submit/', views.submit_assignment, name='submit_assignment'),
+     path('assignment/<int:assignment_id>/submition/', views.assignment_submissions, name='assignment_submissions'),
+     path('assignment/<int:assignment_id>/submition/', views.download_submissions, name='download_submissions'),
+    path('submission/<int:submission_id>/grade/', views.grade_submission, name='grade_submission'),
+    path('course/<int:course_id>/grades/', views.view_grades, name='view_grades'),
 
 
 
@@ -72,7 +77,7 @@ urlpatterns = [
     path('students/', views.view_students, name='view_students'),
 
     # לוחות / ציונים
-    path('grades/', views.view_grades, name='view_grades'),
+    path('grades/', views.all_my_submissions, name='view_grades'),
     path('student/dashboard/', views.student_dashboard, name='student_dashboard'),
 
     # ⚠️ אדמין

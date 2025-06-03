@@ -1,0 +1,189 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<style>
+    .section-title {
+        background-color: #1a1234;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 12px;
+        font-weight: bold;
+        display: inline-block;
+        margin-bottom: 15px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 40px;
+    }
+    th, td {
+        text-align: left;
+        padding: 12px 20px;
+        background-color: #0e0824;
+        color: white;
+    }
+    th {
+        background-color: #1a1234;
+    }
+    tr:nth-child(even) td {
+        background-color: #150c30;
+    }
+    .level-select, .filter-select {
+        padding: 5px;
+        border-radius: 6px;
+        border: none;
+        background-color: #2e2e5e;
+        color: white;
+    }
+    .update-btn {
+        padding: 5px 10px;
+        border-radius: 6px;
+        background-color: #3c79ff;
+        color: white;
+        border: none;
+        cursor: pointer;
+    }
+    .update-btn:hover {
+        background-color: #0055cc;
+    }
+    .search-filter-bar {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 10px;
+    }
+    .search-box input {
+        padding: 6px 12px;
+        border-radius: 8px;
+        border: none;
+        background-color: #2b2646;
+        color: white;
+        width: 200px;
+    }
+</style>
+
+<script>
+    function filterTable(sectionId, searchId, levelId) {
+        const search = document.getElementById(searchId).value.toLowerCase();
+        const selectedLevel = document.getElementById(levelId).value.toLowerCase();
+        const rows = document.querySelectorAll(`#${sectionId} tbody tr`);
+
+        rows.forEach(row => {
+            const name = row.querySelector('td:nth-child(1)').innerText.toLowerCase();
+            const email = row.querySelector('td:nth-child(2)').innerText.toLowerCase();
+            const currentLevel = row.querySelector('td:nth-child(3)').innerText.toLowerCase();
+
+            const matchesSearch = name.includes(search) || email.includes(search);
+            const matchesLevel = selectedLevel === "all" || currentLevel === selectedLevel;
+
+            row.style.display = (matchesSearch && matchesLevel) ? '' : 'none';
+        });
+    }
+</script>
+
+<div id="students-section">
+    <span class="section-title">STUDENTS</span>
+    <div class="search-filter-bar">
+        <input type="text" id="student-search" class="search-box" placeholder="🔍 Search student"
+               onkeyup="filterTable('students-section', 'student-search', 'student-level-filter')">
+        <select id="student-level-filter" class="filter-select"
+                onchange="filterTable('students-section', 'student-search', 'student-level-filter')">
+            <option value="all">All Levels</option>
+            {% for level in levels %}
+                <option value="{{ level.name }}">{{ level.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>NAME</th>
+            <th>EMAIL</th>
+            <th>CURRENT LEVEL</th>
+            <th>UPDATE TO</th>
+            <th>UPDATE</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for student in students %}
+        <tr>
+            <td><strong>{{ student.user.username }}</strong></td>
+            <td>{{ student.user.email }}</td>
+            <td>{{ student.learning_level.name }}</td>
+            <td>
+                <form method="post" style="display: flex;">
+                    {% csrf_token %}
+                    <select name="learning_level" class="level-select">
+                        {% for level in levels %}
+                            <option value="{{ level.id }}" {% if level.id == student.learning_level.id %}selected{% endif %}>
+                                {{ level.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" name="user_type" value="student">
+                    <input type="hidden" name="user_id" value="{{ student.id }}">
+            </td>
+            <td>
+                    <button type="submit" class="update-btn">Update</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div id="teachers-section">
+    <span class="section-title">TEACHERS</span>
+    <div class="search-filter-bar">
+        <input type="text" id="teacher-search" class="search-box" placeholder="🔍 Search teacher"
+               onkeyup="filterTable('teachers-section', 'teacher-search', 'teacher-level-filter')">
+        <select id="teacher-level-filter" class="filter-select"
+                onchange="filterTable('teachers-section', 'teacher-search', 'teacher-level-filter')">
+            <option value="all">All Levels</option>
+            {% for level in levels %}
+                <option value="{{ level.name }}">{{ level.name }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>NAME</th>
+            <th>EMAIL</th>
+            <th>CURRENT LEVEL</th>
+            <th>UPDATE TO</th>
+            <th>UPDATE</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for teacher in teachers %}
+        <tr>
+            <td><strong>{{ teacher.user.username }}</strong></td>
+            <td>{{ teacher.user.email }}</td>
+            <td>{{ teacher.learning_level.name }}</td>
+            <td>
+                <form method="post" style="display: flex;">
+                    {% csrf_token %}
+                    <select name="learning_level" class="level-select">
+                        {% for level in levels %}
+                            <option value="{{ level.id }}" {% if level.id == teacher.learning_level.id %}selected{% endif %}>
+                                {{ level.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    <input type="hidden" name="user_type" value="teacher">
+                    <input type="hidden" name="user_id" value="{{ teacher.id }}">
+            </td>
+            <td>
+                    <button type="submit" class="update-btn">Update</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

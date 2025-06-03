@@ -1,13 +1,15 @@
+import io
+import zipfile
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from .forms import CourseForm, CourseSectionForm, SectionContentForm, SubmissionForm, UserForm, StudentSignupForm, TeacherSignupForm, ManagerSignupForm, StudentProfileUpdateForm
+from .forms import CourseForm, CourseSectionForm, GradeSubmissionForm, SectionContentForm, SubmissionForm, UserForm, StudentSignupForm, TeacherSignupForm, ManagerSignupForm, StudentProfileUpdateForm
 from .models import Assignment, Course, CourseMaterial, CourseSection, Enrollment, LearningLevel, SectionContent, Student, Submission, Teacher, Manager, StudentEvent, StudentSchedule, TeacherMessage
 import json
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils.dateformat import format
-from django.http import JsonResponse
+from django.http import HttpResponse, HttpResponseForbidden, JsonResponse
 from .models import Message
 from django.db.models import Prefetch 
 from .models import LessonRecord, Course
@@ -214,9 +216,9 @@ def login_view(request):
 
 
 
-@login_required
-def view_grades(request):
-    return render(request, 'users/view_grades.html')
+# @login_required
+# def view_grades(request):
+#     return render(request, 'users/view_grades.html')
 
 
 
@@ -618,7 +620,7 @@ def course_detail(request, course_id):
     return render(request, 'users/course_detail.html', {
         'course': course,
         'sections': sections,
-        'is_teacher': request.user.teacher == course.teacher,
+        'is_teacher': True #request.user.teacher == course.teacher,
     })
 
 @login_required
@@ -713,6 +715,106 @@ def delete_content(request, content_id):
     return redirect('course_detail', course_id=course_id)
 
 @login_required
+def assignment_submissions(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    
+    # Verify teacher owns this assignment
+    if not hasattr(request.user, 'teacher') or request.user.teacher != assignment.content.section.course.teacher:
+        return HttpResponseForbidden()
+    
+    submissions = assignment.submissions.all().select_related('student')
+    
+    # Calculate statistics
+    total_students = Enrollment.objects.filter(course=assignment.content.section.course).count()
+    submitted_count = submissions.filter(status__in=['submitted', 'late', 'graded']).count()
+    graded_count = submissions.filter(status='graded').count()
+    
+    return render(request, 'users/assignment_submissions.html', {
+        'assignment': assignment,
+        'submissions': submissions,
+        'total_students': total_students,
+        'submitted_count': submitted_count,
+        'graded_count': graded_count,
+    })
+
+@login_required
+def grade_submission(request, submission_id):
+    submission = get_object_or_404(Submission, id=submission_id)
+    
+    # Verify teacher owns this assignment
+    if not hasattr(request.user, 'teacher') or request.user.teacher != submission.assignment.content.section.course.teacher:
+        return HttpResponseForbidden()
+    
+    if request.method == 'POST':
+        form = GradeSubmissionForm(request.POST, instance=submission)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Grade submitted successfully!')
+            return redirect('assignment_submissions', assignment_id=submission.assignment.id)
+    else:
+        form = GradeSubmissionForm(instance=submission)
+    
+    return render(request, 'users/grade_submission.html', {
+        'form': form,
+        'submission': submission,
+        'assignment': submission.assignment,
+    })
+
+@login_required
+def view_grades(request, course_id):
+    course = get_object_or_404(Course, id=course_id)
+    
+    # Verify student is enrolled
+    if not hasattr(request.user, 'student') or not Enrollment.objects.filter(
+        student=request.user.student,
+        course=course
+    ).exists():
+        return HttpResponseForbidden()
+    
+    # Get all assignments in this course with the student's submissions
+    assignments = []
+    for section in course.sections.all():
+        for content in section.contents.filter(content_type='assignment'):
+            assignment = content.assignment
+            submission = assignment.get_student_submission(request.user.student)
+            assignments.append({
+                'assignment': assignment,
+                'submission': submission,
+                'section': section,
+            })
+    
+    return render(request, 'users/view_grades.html', {
+        'course': course,
+        'assignments': assignments,
+    })
+
+
+@login_required
+def download_submissions(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
+    
+    # Verify teacher owns this assignment
+    if not hasattr(request.user, 'teacher') or request.user.teacher != assignment.content.section.course.teacher:
+        return HttpResponseForbidden()
+    
+    submissions = assignment.submissions.exclude(submitted_file='')
+    
+    # Create zip file in memory
+    zip_buffer = io.BytesIO()
+    with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zip_file:
+        for submission in submissions:
+            if submission.submitted_file:
+                file_path = submission.submitted_file.path
+                arcname = f"{submission.student.user.username}_{submission.submitted_file.name}"
+                zip_file.write(file_path, arcname)
+    
+    zip_buffer.seek(0)
+    response = HttpResponse(zip_buffer, content_type='application/zip')
+    response['Content-Disposition'] = f'attachment; filename="{assignment.content.title}_submissions.zip"'
+    return response
+
+
+@login_required
 def assignment_list(request):
     # Get all courses the student is enrolled in
     enrollments = Enrollment.objects.filter(student=request.user.student)
@@ -771,12 +873,47 @@ def assignment_detail(request, assignment_id):
         if not submission:
             form = SubmissionForm()
     
-    return render(request, 'student/assignment_detail.html', {
+    return render(request, 'users/assignment_detail.html', {
         'assignment': assignment,
         'submission': submission,
         'form': form,
         'is_past_due': assignment.deadline < timezone.now()
     })
+
+
+@login_required
+def all_my_submissions(request):
+    if not hasattr(request.user, 'student'):
+        return HttpResponseForbidden("Only students can access this page.")
+    
+    # Get all submissions for this student, ordered by submission date (newest first)
+    submissions = Submission.objects.filter(
+        student=request.user.student
+    ).select_related(
+        'assignment',
+        'assignment__content',
+        'assignment__content__section',
+        'assignment__content__section__course'
+    ).order_by('-submitted_at')
+    
+    # Organize by course for optional grouping
+    courses = {}
+    for submission in submissions:
+        course = submission.assignment.content.section.course
+        if course.id not in courses:
+            courses[course.id] = {
+                'course': course,
+                'submissions': []
+            }
+        courses[course.id]['submissions'].append(submission)
+    
+    return render(request, 'users/all_submissions.html', {
+        'courses': courses.values(),
+        'all_submissions': submissions,
+        'total_submissions': submissions.count(),
+        'graded_count': submissions.filter(status='graded').count(),
+    })
+
 
 @login_required
 def view_submission(request, submission_id):
@@ -787,7 +924,7 @@ def view_submission(request, submission_id):
         messages.error(request, "You don't have permission to view this submission.")
         return redirect('assignment_list')
     
-    return render(request, 'student/view_submission.html', {
+    return render(request, 'users/view_submission.html', {
         'submission': submission
     })
 
@@ -862,12 +999,18 @@ def student_course_detail(request, course_id):
         messages.success(request, f"Successfully enrolled in {course.title}!")
         return redirect('student_course_content', course_id=course.id)
     
+    # Get all sections for this course, ordered by their 'order' field
+    sections = course.sections.all().order_by('order').prefetch_related('contents')    
+    
     context = {
         'course': course,
         'is_enrolled': is_enrolled,
-        'can_enroll': level_match and not is_enrolled
+        'can_enroll': level_match and not is_enrolled,
+        'sections': sections,  # Add this line to include sections in the context
+        'is_teacher': False,   # Add this to match your template's expectations
     }
     return render(request, 'users/course_detail.html', context)
+
 
 @login_required
 def unenroll_course(request, course_id):
@@ -911,7 +1054,8 @@ def student_course_content(request, course_id):
         assignment__content__section__course=course
     ).select_related('assignment')
 
-    submission_map = {sub.assignment_id: sub for sub in submissions}
+    submission_map = {sub.assignment_id : sub for sub in submissions}
+    print(submission_map)
 
     return render(request, 'users/course_content.html', {
         'course': course,
@@ -922,32 +1066,47 @@ def student_course_content(request, course_id):
 
 
 @login_required
-def submit_assignment(request):
-    if request.method == 'POST':
-        assignment_id = request.POST.get('assignment_id')
-        assignment = get_object_or_404(Assignment, id=assignment_id)
-        student = request.user.student
-        
-        if Submission.objects.filter(assignment=assignment, student=student).exists():
-            return JsonResponse({'success': False, 'message': 'You have already submitted this assignment'})
-        
-        submitted_file = request.FILES.get('submitted_file')
-        submission_text = request.POST.get('submission_text', '').strip()
-        
-        if not (submitted_file or submission_text):
-            return JsonResponse({'success': False, 'message': 'You must provide either a file or text submission'})
-        
-        Submission.objects.create(
-            assignment=assignment,
-            student=student,
-            submitted_file=submitted_file,
-            submission_text=submission_text
-        )
-        
-        return JsonResponse({'success': True})
+def submit_assignment(request, assignment_id):
+    assignment = get_object_or_404(Assignment, id=assignment_id)
     
-    return JsonResponse({'success': False, 'message': 'Invalid request'})
-
+    # Verify student is enrolled in the course
+    if not hasattr(request.user, 'student') or not Enrollment.objects.filter(
+        student=request.user.student, 
+        course=assignment.content.section.course
+    ).exists():
+        return HttpResponseForbidden()
+    
+    # Check if submission already exists
+    submission, created = Submission.objects.get_or_create(
+        assignment=assignment,
+        student=request.user.student,
+        defaults={'status': 'draft'}
+    )
+    
+    if request.method == 'POST':
+        print(hasattr(request.user, 'student'))
+        form = SubmissionForm(request.POST, request.FILES, instance=submission)
+        if form.is_valid():
+            submission = form.save(commit=False)
+            
+            # Set status based on whether it's a draft or final submission
+            if 'submit_final' in request.POST:
+                submission.status = 'submitted' if not submission.is_late() else 'late'
+                messages.success(request, 'Assignment submitted successfully!')
+            else:
+                messages.success(request, 'Draft saved successfully!')
+                
+            submission.save()
+            return redirect('student_course_detail', course_id=assignment.content.section.course.id)
+    else:
+        form = SubmissionForm(instance=submission)
+    
+    return render(request, 'users/submit_assignment.html', {
+        'form': form,
+        'assignment': assignment,
+        'submission': submission,
+        'is_late': submission.is_late() if not created else False,
+    })
 # views.py
 
 from django.contrib.auth.decorators import login_required
@@ -1101,20 +1260,20 @@ def upload_material(request):
 
     return render(request, 'users/upload_material.html', {'form': form})
 
-@login_required
-def course_detail(request, course_id):
-    course = get_object_or_404(Course, id=course_id)
-    sections = course.sections.prefetch_related('contents')
+# @login_required
+# def course_detail(request, course_id):
+#     course = get_object_or_404(Course, id=course_id)
+#     sections = course.sections.prefetch_related('contents')
 
-    # כל הקבצים בקורס הזה לפי הרמה
-    level = course.learning_level
-    contents = SectionContent.objects.filter(section__course__learning_level=level)
+#     # כל הקבצים בקורס הזה לפי הרמה
+#     level = course.learning_level
+#     contents = SectionContent.objects.filter(section__course__learning_level=level)
 
-    return render(request, 'users/course_detail.html', {
-        'course': course,
-        'sections': sections,
-        'level_contents': contents
-    })
+#     return render(request, 'users/course_detail.html', {
+#         'course': course,
+#         'sections': sections,
+#         'level_contents': contents
+#     })
 
 
 def view_lesson_records(request):
