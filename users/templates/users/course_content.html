@@ -52,10 +52,14 @@
                                                     <span class="badge bg-warning text-dark">Due {{ assignment.deadline|timeuntil }}</span>
                                                 {% endif %}
                                                 
-                                                {% if assignment.submission %}
-                                                    <a href="{% url 'view_submission' assignment.submission.id %}" class="btn btn-sm btn-success ms-2">
-                                                        View Submission
-                                                    </a>
+                                                {% if assignment.id in submission_map %}
+                                                    <button 
+                                                    class="btn btn-sm btn-primary ms-2 submit-assignment-btn" 
+                                                    style="background-color: gray; border-color: gray;"
+                                                    disabled
+                                                    >
+                                                        <i class="fas fa-upload"></i> Assignment Submitted
+                                                    </button>
                                                 {% else %}
                                                     <!-- Replace this link with a modal-triggering button -->
                                                     <button class="btn btn-sm btn-primary ms-2 submit-assignment-btn" 

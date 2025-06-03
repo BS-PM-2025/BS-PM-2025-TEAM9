@@ -189,6 +189,13 @@ class Assignment(models.Model):
     content = models.OneToOneField(SectionContent, on_delete=models.CASCADE, related_name='assignment', null=True, blank=True)
     deadline = models.DateTimeField()
     max_points = models.PositiveIntegerField(default=100)
+    allow_late_submissions = models.BooleanField(default=False)
+    submission_types = models.CharField(
+        max_length=20,
+        choices=[('file', 'File'), ('text', 'Text'), ('both', 'File or Text')],
+        default='both'
+    )
+    rubric = models.JSONField(blank=True, null=True)  # For advanced grading
     
     def __str__(self):
         return f"{self.content.title} (Due: {self.deadline})"
@@ -199,17 +206,73 @@ class Assignment(models.Model):
             raise ValueError("Cannot create Assignment for non-assignment content")
         super().save(*args, **kwargs)
 
+    @property
+    def percent_graded(self):
+        total = self.submissions.count()
+        if total == 0:
+            return 0
+        return (self.submissions.filter(status='graded').count() / total) * 100
+
+    @property
+    def percent_submitted(self):
+        total_enrollments = self.content.section.course.enrollments.count()
+        if total_enrollments == 0:
+            return 0
+        return (self.submissions.count() / total_enrollments) * 100
+
+    @property
+    def graded_count(self):
+        return self.submissions.filter(status='graded').count()
+
+    @property
+    def submitted_count(self):
+        return self.submissions.count()
+    
+    def get_student_submission(self, student):
+        """Helper method to get a student's submission"""
+        try:
+            return self.submissions.get(student=student)
+        except Submission.DoesNotExist:
+            return None
+
 class Submission(models.Model):
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('submitted', 'Submitted'),
+        ('late', 'Submitted Late'),
+        ('graded', 'Graded'),
+    ]
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE, related_name='submissions')
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    submitted_file = models.FileField(upload_to='submissions/%Y/%m/%d/')
+    submitted_file = models.FileField(upload_to='users/submissions/%Y/%m/%d/')
     submission_text = models.TextField(blank=True, null=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
+    modified_at = models.DateTimeField(auto_now=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     grade = models.PositiveIntegerField(blank=True, null=True)
     feedback = models.TextField(blank=True, null=True)
+    teacher_notes = models.TextField(blank=True, null=True)
 
     class Meta:
         unique_together = ('assignment', 'student')
+        ordering = ['-submitted_at']
+
+
+    def save(self, *args, **kwargs):
+        now = timezone.now()
+
+        # Automatically set status based on conditions
+        if self.grade is not None:
+            self.status = 'graded'
+        elif self.submitted_file or self.submission_text:
+            if self.assignment.deadline and now > self.assignment.deadline:
+                self.status = 'late'
+            else:
+                self.status = 'submitted'
+        else:
+            self.status = 'draft'
+
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.student}'s submission for {self.assignment}"
@@ -217,6 +280,12 @@ class Submission(models.Model):
     def is_late(self):
         return self.submitted_at > self.assignment.deadline
     
+    @property
+    def points_percentage(self):
+        """Calculate percentage score if graded"""
+        if self.grade is not None and self.assignment.max_points > 0:
+            return (self.grade / self.assignment.max_points) * 100
+        return None
 # users/models.py
 
 class LessonRecord(models.Model):

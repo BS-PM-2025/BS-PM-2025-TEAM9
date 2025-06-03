@@ -1,57 +1,258 @@
-{% extends "base.html" %}
+{% extends 'base.html' %}
+{% block title %}{{ course.title }}{% endblock %}
 
 {% block content %}
-<div class="upload-container" style="max-width: 700px; margin: 50px auto; background: #fff; padding: 30px; border-radius: 15px; box-shadow: 0 0 30px rgba(0,0,0,0.1);">
-    <h2 style="text-align:center; font-weight: bold;">📄 Upload Course Files (Timeline & Documents)</h2>
-    <form method="POST" enctype="multipart/form-data" style="margin-bottom: 40px;">
-        {% csrf_token %}
-        <input type="hidden" name="upload_type" value="material">
-
-        <div style="border: 2px dashed #ccc; border-radius: 10px; padding: 30px; text-align: center;">
-            <p style="font-weight:bold; margin-bottom:10px;">📂 Upload PDF / DOC / Timeline File</p>
-            <input type="file" name="file_upload" accept=".pdf,.doc,.docx" required>
-            <div style="margin-top: 20px;">
-                <label for="timeline_material" style="font-weight: bold;">🗓️ Timeline:</label>
-                <input type="date" name="timeline_date" id="timeline_material" required>
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-header bg-white p-4 mb-4 rounded shadow-sm">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h1 class="mb-1">
+                            <i class="fas fa-book text-primary mr-2"></i>{{ course.title }}
+                        </h1>
+                        <p class="text-muted mb-0">
+                            <i class="fas fa-layer-group text-secondary mr-1"></i>Level: {{ course.learning_level }}
+                        </p>
+                    </div>
+                    {% if is_teacher %}
+                        <a href="{% url 'add_section' course.id %}" class="btn btn-primary">
+                            <i class="fas fa-plus-circle mr-2"></i> Add Section
+                        </a>
+                    {% endif %}
+                </div>
             </div>
         </div>
+    </div>
 
-        <div style="text-align:center; margin-top: 20px;">
-            <button type="submit" style="padding: 10px 25px; background-color: #3498db; color: white; border: none; border-radius: 5px; font-weight: bold;">
-                Upload File
-            </button>
-            <button type="submit" style="padding: 10px 25px; background-color: #3498db; color: white; border: none; border-radius: 5px; font-weight: bold;">
-                Save Changes
-            </button>
-
-        </div>
-    </form>
-
-    <h2 style="text-align:center; font-weight: bold;">🎥 Upload Instructional Video</h2>
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        <input type="hidden" name="upload_type" value="video">
-
-        <div style="border: 2px dashed #ccc; border-radius: 10px; padding: 30px; text-align: center;">
-            <p style="font-weight:bold; margin-bottom:10px;">📹 Upload MP4 / WebM Video</p>
-            <input type="file" name="video_upload" accept="video/mp4,video/webm" required>
-            <div style="margin-top: 20px;">
-                <label for="timeline_video" style="font-weight: bold;">🗓️ Timeline:</label>
-                <input type="date" name="timeline_date" id="timeline_video" required>
-
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-primary text-white rounded-top">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle mr-2"></i>Course Description
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ course.description }}</p>
+                </div>
             </div>
         </div>
-        
+    </div>
 
-        <div style="text-align:center; margin-top: 20px;">
-            <button type="submit" style="padding: 10px 25px; background-color: #27ae60; color: white; border: none; border-radius: 5px; font-weight: bold;">
-                Upload Video
-            </button>
-            <button type="submit" style="padding: 10px 25px; background-color: #27ae60; color: white; border: none; border-radius: 5px; font-weight: bold;">
-                Save Changes
-            </button>
-
+    {% if can_enroll %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success px-4">
+                    <i class="fas fa-sign-in-alt mr-2"></i> Enroll in this Course
+                </button>
+            </form>
         </div>
-    </form>
+    </div>
+    {% elif is_enrolled %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-success d-flex align-items-center">
+                <i class="fas fa-check-circle me-3 fa-lg"></i>
+                <div>
+                    <h5 class="alert-heading mb-1">You are enrolled</h5>
+                    <p class="mb-0">You have access to all course materials.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% elif not is_teacher %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="alert alert-warning d-flex align-items-center">
+                <i class="fas fa-exclamation-triangle me-3 fa-lg"></i>
+                <div>
+                    <h5 class="alert-heading mb-1">Enrollment Restricted</h5>
+                    <p class="mb-0">This course doesn't match your current learning level.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    {% for section in sections %}
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-gradient-primary text-white rounded-top d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">
+                        <i class="fas fa-folder-open mr-2"></i>{{ section.title }}
+                    </h3>
+                    {% if is_teacher %}
+                        <a href="{% url 'add_content' section.id %}" class="btn btn-sm btn-light">
+                            <i class="fas fa-plus mr-1"></i> Add Content
+                        </a>
+                    {% endif %}
+                </div>
+                <div class="card-body">
+                    {% for content in section.contents.all %}
+                    <div class="mb-4 p-3 border rounded">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">
+                                <i class="fas 
+                                    {% if content.content_type == 'text' %}fa-align-left
+                                    {% elif content.content_type == 'file' %}fa-file-pdf
+                                    {% elif content.content_type == 'video' %}fa-video
+                                    {% elif content.content_type == 'audio' %}fa-volume-up
+                                    {% elif content.content_type == 'assignment' %}fa-tasks
+                                    {% elif content.content_type == 'link' %}fa-link
+                                    {% endif %} text-primary mr-2"></i>
+                                {{ content.title }}
+                            </h5>
+                            {% if is_teacher %}
+                                <div>
+                                    <a href="{% url 'edit_content' content.id %}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </a>
+                                    <a href="{% url 'delete_content' content.id %}" class="btn btn-sm btn-outline-danger ms-1">
+                                        <i class="fas fa-trash"></i> Delete
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if content.content_type == 'text' %}
+                            <div class="p-3 bg-light rounded">
+                                {{ content.text_content|linebreaks }}
+                            </div>
+                        
+                        {% elif content.content_type == 'file' %}
+                            <div class="d-flex align-items-center p-3 bg-light rounded">
+                                <i class="fas fa-file-pdf fa-2x text-danger me-3"></i>
+                                <div>
+                                    <a href="{{ content.file.url }}" target="_blank" class="d-block fw-bold">
+                                        Download File
+                                    </a>
+                                    <small class="text-muted">{{ content.file.name|cut:"course_contents/" }}</small>
+                                </div>
+                            </div>
+                        
+                        {% elif content.content_type == 'video' %}
+                            <div class="ratio ratio-16x9">
+                                <iframe src="{{ content.video_url }}" allowfullscreen class="rounded"></iframe>
+                            </div>
+                        
+                        {% elif content.content_type == 'audio' %}
+                            <audio controls class="w-100 rounded">
+                                <source src="{{ content.audio_file.url }}" type="audio/mpeg">
+                                Your browser does not support the audio element.
+                            </audio>
+                        
+                        {% elif content.content_type == 'assignment' %}
+                            <div class="p-3 bg-light rounded">
+                                <h6 class="d-flex align-items-center">
+                                    <i class="fas fa-tasks text-primary me-2"></i>Instructions:
+                                </h6>
+                                <p>{{ content.assignment_instructions|linebreaks }}</p>
+                                {% if content.assignment_due_date %}
+                                    <p class="mb-0"><strong>Due:</strong> {{ content.assignment_due_date }}</p>
+                                {% endif %}
+                            </div>
+                            
+                            {% if not is_teacher %}
+                                {% with submission=content.assignment.get_student_submission %}
+                                    <div class="mt-3">
+                                        {% if submission %}
+                                            <a href="{% url 'submit_assignment' content.assignment.id %}" class="btn 
+                                                {% if submission.status == 'graded' %}btn-success
+                                                {% elif submission.status == 'submitted' %}btn-primary
+                                                {% elif submission.status == 'late' %}btn-warning
+                                                {% else %}btn-secondary{% endif %}">
+                                                {% if submission.status == 'graded' %}
+                                                    <i class="fas fa-check"></i> Graded ({{ submission.grade }}/{{ content.assignment.max_points }})
+                                                {% elif submission.status == 'submitted' %}
+                                                    <i class="fas fa-paper-plane"></i> View Submission
+                                                {% elif submission.status == 'late' %}
+                                                    <i class="fas fa-clock"></i> View Late Submission
+                                                {% else %}
+                                                    <i class="fas fa-edit"></i> Continue Submission
+                                                {% endif %}
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'submit_assignment' content.assignment.id %}" class="btn btn-primary">
+                                                <i class="fas fa-plus"></i> Start Assignment
+                                            </a>
+                                        {% endif %}
+                                        
+                                        <a href="{% url 'view_grades' content.section.course.id %}" class="btn btn-outline-secondary ms-2">
+                                            <i class="fas fa-graduation-cap"></i> View All Grades
+                                        </a>
+                                    </div>
+                                {% endwith %}
+                            {% else %}
+                                <a href="{% url 'assignment_submissions' content.assignment.id %}" class="btn btn-primary mt-3">
+                                    <i class="fas fa-list-check mr-2"></i> View Submissions
+                                </a>
+                            {% endif %}
+                        {% elif content.content_type == 'link' %}
+                            <a href="{{ content.external_link }}" target="_blank" class="btn btn-outline-primary">
+                                <i class="fas fa-external-link-alt mr-2"></i> Visit Link
+                            </a>
+                        {% endif %}
+                    </div>
+                    {% empty %}
+                    <div class="alert alert-info d-flex align-items-center">
+                        <i class="fas fa-info-circle me-3 fa-lg"></i>
+                        <div>
+                            <p class="mb-0">No content in this section yet.</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info d-flex align-items-center">
+                <i class="fas fa-info-circle me-3 fa-lg"></i>
+                <div>
+                    <h5 class="alert-heading mb-1">No Sections Available</h5>
+                    <p class="mb-0">This course doesn't have any sections yet.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 </div>
+
+<style>
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #4e73df 0%, #224abe 100%);
+    }
+    .page-header {
+        border-left: 4px solid #4e73df;
+    }
+    .card {
+        transition: all 0.3s ease;
+    }
+    .card:hover {
+        box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+    }
+    .content-item {
+        transition: all 0.2s ease;
+    }
+    .content-item:hover {
+        background-color: #f8f9fa;
+    }
+    .alert {
+        border-radius: 8px;
+    }
+    .btn-light {
+        background-color: rgba(255,255,255,0.2);
+        color: white;
+    }
+    .btn-light:hover {
+        background-color: rgba(255,255,255,0.3);
+        color: white;
+    }
+</style>
 {% endblock %}
