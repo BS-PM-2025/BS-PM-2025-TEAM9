@@ -1,54 +1,89 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Welcome to DevMaster</title>
+    <title>Welcome | DevMaster</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
     <style>
         body {
             margin: 0;
             padding: 0;
-            font-family: 'Segoe UI', sans-serif;
-            background: url("{% static 'users/img/welcomeBG.jpg' %}") no-repeat center center fixed;
-            background-size: cover;
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, #0e0b1f, #1c1a36);
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
+            color: white;
         }
 
-        .overlay {
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 40px;
-            border-radius: 20px;
-            color: white;
+        .container {
             text-align: center;
-            width: 400px;
-            box-shadow: 0 0 30px rgba(0, 0, 0, 0.4);
+            background-color: white;
+            border-radius: 20px;
+            padding: 3rem 2rem;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+            color: #14102E;
+        }
+
+        .logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .logo img {
+            height: 28px;
+        }
+
+        h2 {
+            margin: 0 0 1rem;
+            font-size: 1.3rem;
+            letter-spacing: 1px;
+        }
+
+        p {
+            margin-bottom: 2rem;
+            font-size: 0.95rem;
         }
 
         .btn {
-            background-color: #55ccff;
-            color: white;
-            padding: 10px 20px;
-            margin: 10px;
+            display: block;
+            width: 100%;
+            padding: 0.8rem;
+            margin-bottom: 1rem;
             border: none;
-            border-radius: 10px;
-            font-size: 16px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1rem;
             cursor: pointer;
+            text-decoration: none;
         }
 
-        .btn:hover {
-            background-color: #1aa7e0;
+        .btn-login {
+            background-color: #3b57ff;
+            color: white;
+        }
+
+        .btn-signup {
+            background-color: #f2c4e0;
+            color: #14102E;
         }
     </style>
 </head>
 <body>
-    <div class="overlay">
-        <h1>Welcome to DevMaster</h1>
-        <p>Sign in or make a new account</p>
-        <a href="{% url 'login' %}"><button class="btn">Login</button></a>
-        <a href="{% url 'signup' %}"><button class="btn">Signup</button></a>
+    <div class="container">
+        <div class="logo">
+            <img src="{% static 'users/img/logo_black.png' %}" alt="DevMaster Logo">
+        </div>
+        <h2>WELCOME!</h2>
+        <p>LOGIN OR MAKE A NEW ACCOUNT</p>
+        <a href="{% url 'login' %}" class="btn btn-login">LOG IN</a>
+        <a href="{% url 'signup' %}" class="btn btn-signup">SIGN UP</a>
     </div>
 </body>
 </html>
