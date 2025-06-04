@@ -4,34 +4,22 @@
 <div class="container mt-4">
     <div class="row mb-4">
         <div class="col-md-8">
-<<<<<<< HEAD
-            <h1>Available Courses</h1>
-            <p class="text-muted">Courses matching your learning level: {{ request.user.student.learning_level }}</p>
-=======
             <h1 class="display-5 fw-bold text-gradient">🚀 Explore Your Courses</h1>
             <p class="text-muted">Tailored for you: 
                 <span class="badge bg-secondary">{{ request.user.student.learning_level }}</span>
             </p>
->>>>>>> temp-ayman
         </div>
         <div class="col-md-4">
             <form method="get" class="d-flex">
                 <input type="text" name="q" value="{{ search_query }}" 
-<<<<<<< HEAD
-                       class="form-control" placeholder="Search courses...">
-                <button type="submit" class="btn btn-primary ms-2">
-=======
                        class="form-control rounded-pill px-4 shadow-sm" placeholder="Search courses...">
                 <button type="submit" class="btn btn-dark rounded-pill ms-2 px-4 shadow">
->>>>>>> temp-ayman
                     <i class="fas fa-search"></i>
                 </button>
             </form>
         </div>
     </div>
 
-<<<<<<< HEAD
-=======
 <!-- Video Player Placeholder -->
 <div class="row mb-5">
     <div class="col-12 d-flex justify-content-center">
@@ -49,31 +37,10 @@
     </div>
 </div>
 
->>>>>>> temp-ayman
     {% if available_courses %}
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for course in available_courses %}
         <div class="col">
-<<<<<<< HEAD
-            <div class="card h-100 shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title">{{ course.title }}</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">
-                        Taught by {{ course.teacher.user.get_full_name }}
-                    </h6>
-                    <p class="card-text">{{ course.description|truncatewords:20 }}</p>
-                </div>
-                <div class="card-footer bg-white border-top-0">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span class="badge bg-primary rounded-pill">
-                            {{ course.learning_level }}
-                        </span>
-                        <a href="{% url 'student_course_detail' course.id %}" 
-                           class="btn btn-sm btn-outline-primary">
-                            View Details
-                        </a>
-                    </div>
-=======
             <div class="card h-100 shadow-lg border-0 bg-light bg-gradient">
                 <div class="card-body">
                     <h5 class="card-title fw-semibold text-dark">{{ course.title }}</h5>
@@ -90,16 +57,12 @@
                        class="btn btn-outline-primary btn-sm">
                         View Details
                     </a>
->>>>>>> temp-ayman
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-<<<<<<< HEAD
-    <div class="alert alert-info">
-=======
     <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for _ in "123456" %}
         <div class="col">
@@ -119,7 +82,6 @@
         {% endfor %}
     </div>
     <div class="alert alert-info mt-4">
->>>>>>> temp-ayman
         {% if search_query %}
             No courses found matching your search.
         {% else %}
@@ -130,33 +92,6 @@
 
     {% if enrolled_courses %}
     <div class="mt-5">
-<<<<<<< HEAD
-        <h2>Your Enrolled Courses</h2>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-2">
-            {% for course in enrolled_courses %}
-            <div class="col">
-                <div class="card h-100 shadow-sm">
-                    <div class="card-body">
-                        <h5 class="card-title">{{ course.title }}</h5>
-                        <h6 class="card-subtitle mb-2 text-muted">
-                            Taught by {{ course.teacher.user.get_full_name }}
-                        </h6>
-                        <p class="card-text">{{ course.description|truncatewords:20 }}</p>
-                    </div>
-                    <div class="card-footer bg-white border-top-0">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <a href="{% url 'student_course_content' course.id %}" 
-                               class="btn btn-sm btn-primary">
-                                Enter Course
-                            </a>
-                            <form method="post" action="{% url 'unenroll_course' course.id %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn btn-sm btn-outline-danger">
-                                    Unenroll
-                                </button>
-                            </form>
-                        </div>
-=======
         <h2 class="fw-bold text-gradient">📚 Your Enrolled Courses</h2>
         <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mt-2">
             {% for course in enrolled_courses %}
@@ -180,7 +115,6 @@
                                 Unenroll
                             </button>
                         </form>
->>>>>>> temp-ayman
                     </div>
                 </div>
             </div>
@@ -189,9 +123,6 @@
     </div>
     {% endif %}
 </div>
-<<<<<<< HEAD
-{% endblock %}
-=======
 
 <!-- Add custom styles -->
 <style>
@@ -232,4 +163,3 @@
     }
 </style>
 {% endblock %}
->>>>>>> temp-ayman

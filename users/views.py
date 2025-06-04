@@ -1,6 +1,6 @@
 import io
 import zipfile
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
@@ -14,6 +14,7 @@ from .models import Message
 from django.db.models import Prefetch 
 from .models import LessonRecord, Course
 from django.contrib import messages
+from django.contrib.auth.models import User
 
 
 @login_required
@@ -1279,4 +1280,30 @@ def upload_material(request):
 def view_lesson_records(request):
     return render(request, 'users/view_lesson_records.html')
 
+
+def manage_users(request):
+    users = User.objects.all()
+    return render(request, 'users/manage_users.html', {'users': users, 'levels': LearningLevel.objects.all()})
+
+def update_user_level(request, user_id):
+    if request.method == 'POST':
+        level_id = request.POST.get('level_id')
+        level = get_object_or_404(LearningLevel, id=level_id)
+        user = get_object_or_404(User, id=user_id)
+        
+        if hasattr(user, 'student'):
+            user.student.learning_level = level
+            user.student.save()
+        elif hasattr(user, 'teacher'):
+            user.teacher.learning_level = level
+            user.teacher.save()
+        
+        messages.success(request, f"{user.username}'s level updated.")
+    return redirect('manage_users')
+
+def delete_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    user.delete()
+    messages.success(request, f"User {user.username} deleted.")
+    return redirect('manage_users')
 

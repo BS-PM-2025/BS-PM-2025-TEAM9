@@ -1,0 +1,266 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Users Management</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Orbitron', sans-serif;
+            background-color: #f7f7f7;
+            margin: 0;
+            padding: 0;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background-color: #14102E;
+            color: white;
+        }
+
+        .topbar img {
+            height: 30px;
+        }
+
+        .topbar .nav-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-nav {
+            background-color: #6c757d;
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .card {
+            max-width: 1100px;
+            margin: 2rem auto;
+            background-color: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .header {
+            background-color: #14102E;
+            padding: 1.5rem 2rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .header h2 {
+            margin: 0;
+        }
+
+        .header .filters {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .header select, .header input {
+            padding: 0.5rem 1rem;
+            border-radius: 30px;
+            border: none;
+            background-color: #2d294f;
+            color: white;
+        }
+
+        .header input::placeholder {
+            color: #aaa;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: white;
+            color: #14102E;
+            font-size: 1rem;
+        }
+
+        tr {
+            background-color: #14102E;
+            color: white;
+        }
+
+        td strong {
+            background-color: #1e1a3f;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            display: inline-block;
+        }
+
+        .btn-update {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+
+        .btn-delete {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 6px 12px;
+            cursor: pointer;
+        }
+
+        select[name="level_id"] {
+            padding: 6px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        form {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+<div class="topbar">
+    <div class="logo">
+        <img src="{% static 'users/img/logo.png' %}" alt="DevMaster Logo">
+    </div>
+    <div class="nav-links">
+        <a href="{% url 'manager_home' %}" class="btn-nav">🏠 Manager Home</a>
+        <a href="{% url 'logout' %}" class="btn-nav">🔓 Logout</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="header">
+        <h2>USERS MANAGEMENT</h2>
+        <div class="filters">
+            <select id="typeFilter">
+                <option value="all">All</option>
+                <option value="student">Students</option>
+                <option value="teacher">Teachers</option>
+            </select>
+            <select id="levelFilter">
+                <option value="all">All Levels</option>
+                <option value="beginner">Beginner</option>
+                <option value="intermediate">Intermediate</option>
+                <option value="advanced">Advanced</option>
+                <option value="not">Not Assigned</option>
+            </select>
+            <input type="text" id="searchInput" placeholder="🔍 SEARCH...">
+        </div>
+    </div>
+
+    <table id="usersTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Type</th>
+                <th>Current Level</th>
+                <th>Update Level</th>
+                <th>Delete</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            {% if user.student or user.teacher %}
+            <tr data-type="{% if user.student %}student{% elif user.teacher %}teacher{% endif %}"
+                data-level="{% if user.student.learning_level %}{{ user.student.learning_level.name|lower }}{% elif user.teacher.learning_level %}{{ user.teacher.learning_level.name|lower }}{% else %}not{% endif %}">
+                <td>
+                    {% if user.get_full_name %}
+                        <strong>{{ user.get_full_name }}</strong>
+                    {% else %}
+                        <strong>{{ user.username }}</strong>
+                    {% endif %}
+                </td>
+                <td>{{ user.email }}</td>
+                <td>{% if user.student %}Student{% elif user.teacher %}Teacher{% endif %}</td>
+                <td>
+                    {% if user.student.learning_level %}
+                        <strong>{{ user.student.learning_level.name|upper }}</strong>
+                    {% elif user.teacher.learning_level %}
+                        <strong>{{ user.teacher.learning_level.name|upper }}</strong>
+                    {% else %}
+                        <strong>Not Assigned</strong>
+                    {% endif %}
+                </td>
+                <td>
+                    <form method="post" action="{% url 'update_user_level' user.id %}">
+                        {% csrf_token %}
+                        <select name="level_id">
+                            {% for level in levels %}
+                                <option value="{{ level.id }}"
+                                    {% if user.student.learning_level == level or user.teacher.learning_level == level %}
+                                        selected
+                                    {% endif %}>{{ level.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" class="btn-update">Update</button>
+                    </form>
+                </td>
+                <td>
+                    <form method="post" action="{% url 'delete_user' user.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-delete" onclick="return confirm('Are you sure?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const typeFilter = document.getElementById('typeFilter');
+    const levelFilter = document.getElementById('levelFilter');
+    const rows = document.querySelectorAll('#usersTable tbody tr');
+
+    function filterTable() {
+        const search = searchInput.value.toLowerCase();
+        const type = typeFilter.value;
+        const level = levelFilter.value;
+
+        rows.forEach(row => {
+            const name = row.children[0].innerText.toLowerCase();
+            const email = row.children[1].innerText.toLowerCase();
+            const rowType = row.dataset.type;
+            const rowLevel = row.dataset.level;
+
+            const matchesType = (type === 'all') || (type === rowType);
+            const matchesLevel = (level === 'all') || (level === rowLevel);
+            const matchesSearch = name.includes(search) || email.includes(search);
+
+            row.style.display = (matchesType && matchesLevel && matchesSearch) ? '' : 'none';
+        });
+    }
+
+    searchInput.addEventListener('input', filterTable);
+    typeFilter.addEventListener('change', filterTable);
+    levelFilter.addEventListener('change', filterTable);
+</script>
+</body>
+</html>

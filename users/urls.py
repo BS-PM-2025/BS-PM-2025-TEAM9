@@ -64,6 +64,11 @@ urlpatterns = [
     path('student/edit/', views.edit_student_profile, name='edit_student_profile'),
     path('teacher/profile/', views.teacher_profile, name='teacher_profile'),
     path('teacher/edit/', views.edit_teacher_profile, name='edit_teacher_profile'),
+    #מנהל מעדכן משתמשים
+    path('manager/users/', views.manage_users, name='manage_users'),
+    path('manager/users/<int:user_id>/update_level/', views.update_user_level, name='update_user_level'),
+    path('manager/users/<int:user_id>/delete/', views.delete_user, name='delete_user'),
+
 
     # הודעות
     path('student/messages/', views.student_messages, name='student_messages'),

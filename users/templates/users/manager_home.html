@@ -1,3 +1,71 @@
-<h1>Welcome, Manager {{ request.user.username }} 🧑‍💼</h1>
-<p>This is your manager dashboard.</p>
-<p><a href="{% url 'logout' %}">Logout</a></p>
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manager Homepage</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1 {
+            color: #14102e;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            margin-bottom: 2rem;
+            color: #444;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .btn-users {
+            background-color: #007bff;
+            color: white;
+        }
+
+        .btn-logout {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome, Manager {{ request.user.username }} 🧑‍💼</h1>
+        <p>This is your manager dashboard.</p>
+
+        <a href="{% url 'manage_users' %}" class="btn btn-users">👥 View List of Users</a>
+        <a href="{% url 'logout' %}" class="btn btn-logout">Logout</a>
+    </div>
+</body>
+</html>
