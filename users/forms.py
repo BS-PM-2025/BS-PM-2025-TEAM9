@@ -251,3 +251,4 @@ class TimelineUploadForm(forms.ModelForm):
     class Meta:
         model = TimelineUpload
         fields = ['title', 'file']
+

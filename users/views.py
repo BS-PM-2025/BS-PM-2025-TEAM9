@@ -17,6 +17,7 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 
 
+
 @login_required
 def get_homework_by_date(request):
     date = request.GET.get('date')  # YYYY-MM-DD
@@ -149,26 +150,22 @@ def welcome(request):
 from django.contrib.auth.forms import UserCreationForm
 from django.shortcuts import render, redirect
 from .models import Student, Teacher
-
+from .forms import UserForm
 def signup(request):
     if request.method == 'POST':
         form = UserForm(request.POST)
         if form.is_valid():
-            profile = form.cleaned_data['profile']
             user = form.save(commit=False)
             user.set_password(form.cleaned_data['password'])
-            
-
             user.save()
 
+            profile = form.cleaned_data['profile']
             if profile == 'student':
                 Student.objects.create(user=user)
-                login(request, user)
-                return redirect('student_home')
             elif profile == 'teacher':
                 Teacher.objects.create(user=user)
-                login(request, user)
-                return redirect('teacher_home')
+
+            return redirect('login')  # ✅ במקום login אוטומטי ודף בית
 
     else:
         form = UserForm()

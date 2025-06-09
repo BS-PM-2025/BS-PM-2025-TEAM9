@@ -54,6 +54,7 @@ urlpatterns = [
     path('signup/student/', views.student_signup, name='student_signup'),
     path('signup/teacher/', views.teacher_signup, name='teacher_signup'),
     path('signup/manager/', views.manager_signup, name='manager_signup'),
+    
 
     # דפי בית
     path('home/student/', views.student_home, name='student_home'),
