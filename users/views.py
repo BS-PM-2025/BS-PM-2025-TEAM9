@@ -145,6 +145,10 @@ def manager_home(request):
 
 def welcome(request):
     return render(request, 'users/welcome.html')
+def about(request):
+    return render(request, 'users/about.html')
+def about_us(request):
+    return render(request, 'users/about.html') 
 
 
 from django.contrib.auth.forms import UserCreationForm

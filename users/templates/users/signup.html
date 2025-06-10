@@ -164,6 +164,16 @@
 
       <label for="email">Email Address *</label>
       <input type="email" name="email" id="email" placeholder="Enter email" required>
+      <script>
+        window.addEventListener("DOMContentLoaded", () => {
+
+          const params = new URLSearchParams(window.location.search);
+          const email = params.get("email");
+          if (email) {
+            document.getElementById("email").value = email;
+          }
+        });
+      </script>
 
       <div class="row">
         <div>
@@ -189,8 +199,8 @@
       <div class="button-row">
         <button type="submit" class="btn-signup">Sign Up</button>
         <button type="button" class="btn-next" onclick="window.location.href='{% url "welcome" %}'">Back</button>
-
       </div>
+
     </form>
   </div>
   <div class="right-side"></div>

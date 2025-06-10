@@ -1,89 +1,155 @@
-{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Welcome | DevMaster</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600&display=swap" rel="stylesheet">
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Orbitron', sans-serif;
-            background: linear-gradient(135deg, #0e0b1f, #1c1a36);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-        }
+  <meta charset="UTF-8" />
+  <title>About Us | DevMaster</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f8ff;
+    }
+    header {
+      background-color: #0b0e23;
+      color: white;
+      padding: 20px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .logo {
+      font-size: 24px;
+      font-weight: bold;
+    }
+    .logo span {
+      color: #695bff;
+    }
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      margin-left: 20px;
+    }
+    .hero {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px 40px;
+      text-align: center;
+      background-color: #eef4ff;
+    }
+    .feature-card {
+  background-color: #f9faff;
+  padding: 30px;
+  border-radius: 12px;
+  max-width: 300px;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
 
-        .container {
-            text-align: center;
-            background-color: white;
-            border-radius: 20px;
-            padding: 3rem 2rem;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.4);
-            color: #14102E;
-        }
+.feature-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15);
+  cursor: default;
+}
 
-        .logo {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 1.5rem;
-        }
+    .hero h1 {
+      font-size: 32px;
+      margin-bottom: 10px;
+    }
+    .hero p {
+      font-size: 16px;
+      color: #555;
+      margin-bottom: 30px;
+      max-width: 600px;
+    }
+    .email-box {
+      display: flex;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .email-box input {
+      padding: 15px;
+      font-size: 14px;
+      border: none;
+      outline: none;
+      width: 300px;
+    }
+    .email-box button {
+      padding: 15px 25px;
+      background: linear-gradient(to right, #3b6cff, #c140ff);
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
 
-        .logo img {
-            height: 28px;
-        }
+    .features {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      padding: 60px 20px;
+      background-color: white;
+    }
 
-        h2 {
-            margin: 0 0 1rem;
-            font-size: 1.3rem;
-            letter-spacing: 1px;
-        }
+    .feature-card {
+      background-color: #f9faff;
+      padding: 30px;
+      border-radius: 12px;
+      max-width: 300px;
+      text-align: center;
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+    }
 
-        p {
-            margin-bottom: 2rem;
-            font-size: 0.95rem;
-        }
+    .feature-card h3 {
+      color: #333;
+      margin-bottom: 10px;
+    }
 
-        .btn {
-            display: block;
-            width: 100%;
-            padding: 0.8rem;
-            margin-bottom: 1rem;
-            border: none;
-            border-radius: 30px;
-            font-weight: bold;
-            font-size: 1rem;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .btn-login {
-            background-color: #3b57ff;
-            color: white;
-        }
-
-        .btn-signup {
-            background-color: #f2c4e0;
-            color: #14102E;
-        }
-    </style>
+    .feature-card p {
+      color: #555;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <div class="logo">
-            <img src="{% static 'users/img/logo_black.png' %}" alt="DevMaster Logo">
-        </div>
-        <h2>WELCOME!</h2>
-        <p>LOGIN OR MAKE A NEW ACCOUNT</p>
-        <a href="{% url 'login' %}" class="btn btn-login">LOG IN</a>
-        <a href="{% url 'signup' %}" class="btn btn-signup">SIGN UP</a>
+
+  <header>
+    <div class="logo">DEV<span>MASTER</span></div>
+    <nav class="nav-links">
+      <a href="/">Home</a>
+      <a href="{% url 'about' %}">About Us</a>
+      <a href="{% url 'login' %}">Login</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <h1>Welcome to DevMaster</h1>
+    <p>We built DevMaster to help students and teachers manage learning efficiently, with structured tools for scheduling, messaging, and coursework delivery and AI Chatbot.</p>
+
+    <form class="email-box" action="/signup/" method="get">
+      <input type="email" name="email" placeholder="Enter your email address" required />
+      <button type="submit">Sign up</button>
+
+      
+    </form>
+  </section>
+
+  <section class="features">
+    <div class="feature-card">
+      <h3>Smart Course Management</h3>
+      <p>Teachers can create and manage lessons, timelines, and assignments all in one place.</p>
     </div>
+    <div class="feature-card">
+      <h3>Student Dashboard</h3>
+      <p>Students receive personalized views of schedules, grades, and messages from teachers.</p>
+    </div>
+    <div class="feature-card">
+      <h3>Communication Tools</h3>
+      <p>Integrated messaging system keeps teachers and students connected effectively.</p>
+    </div>
+  </section>
+
 </body>
 </html>

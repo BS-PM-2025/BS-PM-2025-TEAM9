@@ -44,6 +44,11 @@ urlpatterns = [
     # דפים כלליים
     path('', views.welcome, name='welcome'),
     path('redirect-after-login/', views.redirect_after_login, name='redirect_after_login'),
+    path('about/', views.about, name='about'),
+    path('', views.welcome, name='welcome'),
+    path('about/', views.about_us, name='about'),
+    path('login/', views.login_view, name='login'),
+
 
     # התחברות/יציאה
     path('login/', views.login_view, name='login'),
