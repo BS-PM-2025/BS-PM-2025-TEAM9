@@ -2,6 +2,7 @@ import uuid
 from django.shortcuts import render
 from groq import Groq
 
+
 GROQ_API_KEY = "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"
 SD_API_URL = "https://4bf4-34-19-25-241.ngrok-free.app/sdapi/v1/txt2img"
 

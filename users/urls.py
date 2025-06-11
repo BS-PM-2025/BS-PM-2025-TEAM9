@@ -80,6 +80,11 @@ urlpatterns = [
     path('student/messages/', views.student_messages, name='student_messages'),
     path('teacher/messages/', views.teacher_messages, name='teacher_messages'),
 
+    path('list-users/', views.list_users, name='list_users'),
+    path('contact-users/', views.contact_users, name='contact_users'),
+    path('student/messages/', views.student_messages, name='student_messages'),
+
+
     # ניהול לוח זמנים / שיעורים
     path('homework-by-date/', views.get_homework_by_date, name='homework_by_date'),
     path('teacher/add_lesson/', views.add_lesson, name='add_lesson'),
@@ -93,4 +98,5 @@ urlpatterns = [
 
     # ⚠️ אדמין
     path('admin/', admin.site.urls),
+    
 ]

@@ -1,0 +1,81 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Contact Users</title>
+    <style>
+        body {
+            background-color: #f1f2f6;
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .topbar {
+            background-color: #495057;
+            color: white;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .user-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #e9ecef;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .contact-link {
+            color: #007bff;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .contact-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="topbar">
+        <div><strong>Devmaster</strong></div>
+        <div>
+            <a href="{% url 'manager_home' %}" style="color:white; margin-right:20px;">🏠 Home</a>
+            <a href="{% url 'login' %}" style="color:white;">Logout</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <h2>📨 Contact Users</h2>
+        {% for user in users %}
+            <div class="user-box">
+                <div>{{ user.username }}</div>
+                <a class="contact-link" href="mailto:{{ user.email }}?subject=Message from Manager">
+                    Contact {{ user.username }}
+                </a>
+            </div>
+        {% empty %}
+            <p>No users found.</p>
+        {% endfor %}
+    </div>
+</body>
+</html>

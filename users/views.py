@@ -1308,3 +1308,31 @@ def delete_user(request, user_id):
     messages.success(request, f"User {user.username} deleted.")
     return redirect('manage_users')
 
+
+# users/views.py
+from django.shortcuts import render
+
+def list_users(request):
+    # לוגיקה להצגת משתמשים
+    return render(request, 'users/list_users.html')
+
+
+
+def contact_users(request):
+    users = User.objects.exclude(is_superuser=True)  # לא כולל מנהל
+    return render(request, 'users/contact_users.html', {'users': users})
+
+# users/views.py
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import EmailMessage  # נניח שיש טבלת הודעות
+from django.contrib.auth.models import User
+
+@login_required
+def student_messages(request):
+    manager = User.objects.filter(is_superuser=True).first()
+    messages = EmailMessage.objects.filter(receiver=request.user)
+    return render(request, 'users/student_messages.html', {
+        'manager': manager,
+        'messages': messages
+    })
