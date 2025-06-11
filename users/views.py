@@ -1346,8 +1346,29 @@ def teacher_messages(request):
         'messages': messages
     })
 
+
+# users/views.py
 from django.shortcuts import render, redirect
+from .models import TeacherBio
 from django.contrib.auth.decorators import login_required
-from .models import Teacher
 
+@login_required
+def add_teacher_bio(request):
+    if request.method == 'POST':
+        bio_text = request.POST.get('bio')
+        if bio_text:
+            TeacherBio.objects.create(user=request.user, bio=bio_text)
+            return redirect('add_teacher_bio')
 
+    bios = TeacherBio.objects.filter(user=request.user).order_by('-created_at')
+    return render(request, 'users/add_bio.html', {'bios': bios})
+
+from django.shortcuts import redirect, get_object_or_404
+from .models import TeacherBio
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def delete_teacher_bio(request, bio_id):
+    bio = get_object_or_404(TeacherBio, id=bio_id, user=request.user)
+    bio.delete()
+    return redirect('add_teacher_bio')

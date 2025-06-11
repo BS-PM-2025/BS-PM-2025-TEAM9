@@ -86,12 +86,20 @@ urlpatterns = [
     path('student/messages/', views.student_messages, name='student_messages'),
 
     path('teacher/messages/', views.teacher_messages, name='teacher_message'),
+
+    path('teacher/add_bio/', views.add_teacher_bio, name='add_teacher_bio'),
+    path('teacher/add_bio/', views.add_teacher_bio, name='add_teacher_bio'),
+    path('teacher/add_bio/', views.add_teacher_bio, name='add_teacher_bio'),
+    path('teacher/delete_bio/<int:bio_id>/', views.delete_teacher_bio, name='delete_teacher_bio'),
+
+
+    
+
     
 
 
     # ניהול לוח זמנים / שיעורים
     path('homework-by-date/', views.get_homework_by_date, name='homework_by_date'),
-    path('teacher/add_lesson/', views.add_lesson, name='add_lesson'),
 
     # ניהול תלמידים
     path('students/', views.view_students, name='view_students'),
