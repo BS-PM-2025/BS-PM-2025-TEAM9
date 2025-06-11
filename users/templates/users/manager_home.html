@@ -2,75 +2,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Manager Homepage</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-        body {
-            font-family: 'Segoe UI', sans-serif;
-            background-color: #f0f2f5;
-            margin: 0;
-            padding: 2rem;
-        }
+  <meta charset="UTF-8">
+  <title>Manager Dashboard | DevMaster</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #f1f4f9;
+      color: #333;
+      display: flex;
+    }
 
-        .container {
-            max-width: 800px;
-            margin: auto;
-            background-color: #ffffff;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            text-align: center;
-        }
+    .sidebar {
+      width: 250px;
+      background-color: #0c0e2c;
+      color: white;
+      height: 100vh;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 25px;
+      align-items: flex-start;
+    }
 
-        h1 {
-            color: #14102e;
-            margin-bottom: 1rem;
-        }
+    .sidebar .logo {
+      font-weight: 700;
+      font-size: 22px;
+      margin-bottom: 40px;
+      letter-spacing: 1px;
+      color: #ffffff;
+    }
 
-        p {
-            margin-bottom: 2rem;
-            color: #444;
-        }
+    .nav-link {
+      color: #c7c7ff;
+      text-decoration: none;
+      font-size: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 14px;
+      border-radius: 8px;
+      width: 100%;
+      transition: 0.3s;
+    }
 
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            margin: 10px;
-            border: none;
-            border-radius: 6px;
-            font-weight: bold;
-            text-decoration: none;
-            cursor: pointer;
-        }
+    .nav-link:hover {
+      background-color: #1a1d48;
+    }
 
-        .btn-users {
-            background-color: #007bff;
-            color: white;
-        }
-        .btn-contact {
-            background-color: #007bff;
-            color: white;
-        }
+    .main-content {
+      flex: 1;
+      padding: 30px 50px;
+    }
 
-        .btn-logout {
-            background-color: #007bff;
-            color: white;
-        }
+    .top-logo {
+      text-align: center;
+      margin-bottom: 30px;
+    }
 
-        .btn:hover {
-            opacity: 0.9;
-        }
-    </style>
+    .top-logo img {
+      max-width: 300px;
+    }
+
+    .section {
+      background-color: white;
+      border-radius: 18px;
+      padding: 35px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    }
+
+    .section h2 {
+      margin-top: 0;
+      font-size: 24px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: #0c0e2c;
+    }
+
+    .section p {
+      color: #555;
+      font-size: 16px;
+      margin: 10px 0 25px;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 12px 24px;
+      margin-right: 12px;
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 8px;
+      text-decoration: none;
+      transition: 0.3s;
+      color: white;
+    }
+
+    .btn-blue { background-color: #4e63ea; }
+    .btn-green { background-color: #2dd4bf; }
+    .btn-red { background-color: #f43f5e; }
+    .btn:hover { opacity: 0.92; }
+
+    .footer {
+      text-align: center;
+      font-size: 13px;
+      color: #999;
+      margin-top: 50px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Welcome, Manager {{ request.user.username }} 🧑‍💼</h1>
-        <p>This is your manager dashboard.</p>
+  <div class="sidebar">
+    <div class="logo">DEVM<span style="color: #6c63ff;">A</span>STER</div>
+    <a href="{% url 'manage_users' %}" class="nav-link">👥 View Users</a>
+    <a href="{% url 'contact_users' %}" class="nav-link">📨 Contact Users</a>
+    <a href="{% url 'login' %}" class="nav-link">🚪 Logout</a>
+  </div>
 
-        <a href="{% url 'manage_users' %}" class="btn btn-users">👥 View List of Users</a>
-        <a href="{% url 'contact_users' %}" class="btn btn-contact">📨 Contact Users</a>
-        <a href="{% url 'login' %}" class="btn btn-logout">Logout</a>
+  <div class="main-content">
+    <div class="top-logo">
+      
     </div>
+
+    <div class="section">
+      <h2>👋 Welcome, Manager {{ user.username }}</h2>
+      <p>This is your manager dashboard. Use the options below to manage users effectively.</p>
+     
+    </div>
+
+    <div class="section">
+      <h2>📬 Recent Communications</h2>
+      <p>No new messages yet. Check back later or contact users directly.</p>
+    </div>
+
+    <div class="footer">
+      © DevMaster. All rights reserved.
+    </div>
+  </div>
 </body>
 </html>
