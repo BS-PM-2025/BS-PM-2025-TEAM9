@@ -65,6 +65,7 @@ urlpatterns = [
     path('home/student/', views.student_home, name='student_home'),
     path('home/teacher/', views.teacher_home, name='teacher_home'),
     path('home/manager/', views.manager_home, name='manager_home'),
+    path('logout/', LogoutView.as_view(next_page='login'), name='logout'),
 
     # ניהול פרופיל
     path('student/edit/', views.edit_student_profile, name='edit_student_profile'),
@@ -83,6 +84,9 @@ urlpatterns = [
     path('list-users/', views.list_users, name='list_users'),
     path('contact-users/', views.contact_users, name='contact_users'),
     path('student/messages/', views.student_messages, name='student_messages'),
+
+    path('teacher/messages/', views.teacher_messages, name='teacher_message'),
+    
 
 
     # ניהול לוח זמנים / שיעורים

@@ -1,0 +1,82 @@
+{% extends "base1.html" %}
+
+{% block title %}AI Chatbot{% endblock %}
+
+{% block content %}
+<style>
+    .chat-container {
+        max-width: 600px;
+        height: 80vh;
+        margin: 0 auto;
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+
+    .chat-header {
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .chat-box {
+        flex: 1;
+        overflow-y: auto;
+        padding-right: 5px;
+        margin-bottom: 15px;
+    }
+
+    .chat-bubble {
+        padding: 10px 15px;
+        border-radius: 15px;
+        margin: 5px 0;
+        max-width: 80%;
+        word-wrap: break-word;
+    }
+
+    .bot {
+        background-color: #f1f0f0;
+        text-align: left;
+    }
+
+    .user {
+        background-color: #dcf8c6;
+        margin-left: auto;
+        text-align: right;
+    }
+
+    form {
+        display: flex;
+        gap: 10px;
+    }
+</style>
+
+<div class="chat-container">
+    <div class="chat-header">🤖 Chat with AI</div>
+
+    <div class="chat-box" id="chatBox">
+        {% for msg in chat_history %}
+            <div class="chat-bubble {{ msg.sender }}">
+                {{ msg.message }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="message" class="form-control" placeholder="Type a message..." required>
+        <button type="submit" class="btn btn-success">Send</button>
+    </form>
+</div>
+
+<script>
+    // Scroll to bottom on page load
+    const chatBox = document.getElementById('chatBox');
+    if (chatBox) {
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+</script>
+{% endblock %}

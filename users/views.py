@@ -1336,3 +1336,18 @@ def student_messages(request):
         'manager': manager,
         'messages': messages
     })
+
+@login_required
+def teacher_messages(request):
+    manager = User.objects.filter(is_superuser=True).first()
+    messages = EmailMessage.objects.filter(receiver=request.user)
+    return render(request, 'users/teacher_messages.html', {
+        'manager': manager,
+        'messages': messages
+    })
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Teacher
+
+

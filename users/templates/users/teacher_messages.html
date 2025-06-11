@@ -1,63 +1,155 @@
-{% extends 'base.html' %}
-{% block title %}Messages to students{% endblock %}
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Teacher Messages | DevMaster</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-{% block content %}
-<div class="container mt-4">
-    <div class="card shadow-lg p-4">
-        <h2 class="mb-4 text-primary">
-            <i class="bi bi-envelope-paper-fill"></i> Messages to students
-        </h2>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f2f5;
+    }
 
-        {% if messages %}
-            <div class="list-group">
-                {% for msg in messages %}
-                    <div class="list-group-item list-group-item-action flex-column align-items-start mb-2">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1"><i class="bi bi-person-circle"></i> {{ msg.sender.username }}</h5>
-                            <small class="text-muted">{{ msg.sent_at|date:"F j, Y, g:i a" }}</small>
-                        </div>
-                        <p class="mb-1">{{ msg.message }}</p>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="alert alert-info" role="alert">
-                No messages yet.
-            </div>
-        {% endif %}
+    .topbar {
+      background-color: #212529;
+      color: white;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 20px;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    .logout-btn {
+      background-color: rgb(46, 38, 189);
+      color: white;
+      border: none;
+      padding: 8px 16px;
+      font-size: 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    .logout-btn:hover {
+      background-color: rgb(62, 45, 187);
+    }
+
+    .container {
+      max-width: 700px;
+      margin: 50px auto;
+      background-color: #ffffff;
+      border-radius: 16px;
+      padding: 30px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
+    }
+
+    h2 {
+      text-align: center;
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 25px;
+    }
+
+    .user-box {
+      background-color: #f1f3f5;
+      padding: 15px 20px;
+      border-radius: 10px;
+      font-size: 16px;
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .mailto-link {
+      display: inline-block;
+      background-color: #0d6efd;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 15px;
+      margin-bottom: 25px;
+      transition: 0.3s;
+    }
+
+    .mailto-link:hover {
+      background-color: #0b5ed7;
+    }
+
+    .divider {
+      margin: 25px 0;
+      border-top: 1px solid #dee2e6;
+    }
+
+    .message-box {
+      background-color: #f8f9fa;
+      border-left: 4px solid #0d6efd;
+      padding: 12px 16px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .message-box small {
+      display: block;
+      color: #6c757d;
+      margin-top: 5px;
+    }
+
+    .no-msg {
+      text-align: center;
+      color: #999;
+      font-size: 15px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="topbar">
+    <h1>Devmaster</h1>
+    <a href="{% url 'teacher_home' %}" class="logout-btn">Logout</a>
+  </div>
+
+  <div class="container">
+    <h2>📨 Your Messages with Manager</h2>
+
+    <div class="user-box">
+      <strong>Username:</strong> {{ user.username }}<br>
+      <strong>Your Email:</strong> {{ user.email }}
     </div>
-</div>
-{% endblock %}
 
+    {% if manager %}
+      <a class="mailto-link"
+         href="mailto:{{ manager.email }}?subject=Message from teacher {{ user.username }}&body=My email is: {{ user.email }}">
+        Send Message to Manager
+      </a>
+    {% endif %}
 
-{% comment %} {% extends 'base.html' %}
-{% block title %}Messages from Teachers{% endblock %}
+    <div class="divider"></div>
 
-{% block content %}
-<div class="container mt-5">
-    <div class="card shadow p-4">
-        <h2 class="mb-4 text-primary">
-            📨 Messages from Teachers
-        </h2>
+    {% for msg in messages %}
+      <div class="message-box">
+        <div><strong>From:</strong> {{ msg.sender.username }}</div>
+        <div>{{ msg.content }}</div>
+        <small>{{ msg.timestamp }}</small>
+      </div>
+    {% empty %}
+      <p class="no-msg">No messages found.</p>
+    {% endfor %}
+  </div>
 
-        {% if messages %}
-            <div class="list-group">
-                {% for msg in messages %}
-                    <div class="list-group-item list-group-item-action mb-3">
-                        <div class="d-flex w-100 justify-content-between">
-                            <h5 class="mb-1">👨‍🏫 {{ msg.sender.username }}</h5>
-                            <small class="text-muted">{{ msg.sent_at|date:"F j, Y, g:i a" }}</small>
-                        </div>
-                        <p class="mb-1">{{ msg.message }}</p>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <div class="alert alert-info" role="alert">
-                No messages yet from your teachers.
-            </div>
-        {% endif %}
-    </div>
-</div>
-{% endblock %} {% endcomment %}
-
+</body>
+</html>

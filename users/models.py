@@ -4,7 +4,6 @@ from django.forms import ValidationError
 from django.utils import timezone
 
 
-
 class LearningLevel(models.Model):
     class LevelType(models.TextChoices):
         BEGINNER = 'beginner', 'Beginner'
