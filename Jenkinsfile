@@ -6,26 +6,32 @@ pipeline {
     }
 
     stages {
-        stage('🔧 Setup') {
+        stage('🔧 Setup Environment') {
             steps {
-                echo '🔧 Setting up virtual environment and installing requirements...'
-                bat 'python -m venv venv'
-                bat '.\\venv\\Scripts\\activate && pip install --upgrade pip'
-                bat '.\\venv\\Scripts\\activate && pip install -r requirements.txt'
+                echo '📦 Creating virtual environment and installing requirements...'
+                bat 'python -m venv %VENV_DIR%'
+                bat '%VENV_DIR%\\Scripts\\activate && pip install --upgrade pip'
+                bat '%VENV_DIR%\\Scripts\\activate && pip install -r requirements.txt'
             }
         }
 
-        stage('🗃️ Migrate') {
+        stage('🗃️ Apply Migrations') {
             steps {
-                echo 'Applying Django migrations...'
-                bat '.\\venv\\Scripts\\activate && python manage.py migrate'
+                echo '⚙️ Applying Django migrations...'
+                bat """
+                call %VENV_DIR%\\Scripts\\activate
+                python manage.py migrate
+                """
             }
         }
 
         stage('✅ Run Unit Tests') {
             steps {
-                echo 'Running Django unit tests...'
-                bat '.\\venv\\Scripts\\activate && python manage.py test'
+                echo '🧪 Running Django unit tests...'
+                bat """
+                call %VENV_DIR%\\Scripts\\activate
+                python manage.py test
+                """
             }
         }
 
@@ -38,7 +44,7 @@ pipeline {
 
     post {
         always {
-            echo '🔁 Pipeline completed.'
+            echo '🔁 Jenkins Pipeline completed.'
         }
         success {
             echo '✅ SUCCESS: All stages passed!'
