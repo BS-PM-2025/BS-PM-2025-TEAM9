@@ -1222,3 +1222,8 @@ def delete_teacher_bio(request, bio_id):
     bio = get_object_or_404(TeacherBio, id=bio_id, user=request.user)
     bio.delete()
     return redirect('add_teacher_bio')
+
+def all_my_submissions(request):
+    current_user = request.user  # אובייקט מסוג User
+    submissions = Submission.objects.filter(student=current_user)
+    return render(request, 'users/grades.html', {'submissions': submissions})
