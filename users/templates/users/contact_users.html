@@ -40,7 +40,7 @@
         }
 
         .container {
-            max-width: 720px;
+            max-width: 900px;
             margin: 50px auto;
             background-color: #ffffff;
             border-radius: 16px;
@@ -50,22 +50,51 @@
 
         h2 {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             font-size: 24px;
         }
 
-        .user-box {
+        .filters {
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            background-color: #e9ecef;
-            padding: 12px 20px;
-            border-radius: 10px;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
-        .user-box div {
-            font-weight: 500;
+        .user-search-input {
+            width: 70%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        .user-type-filter {
+            width: 28%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        th {
+            background-color: #f5f5f5;
+            font-weight: 600;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
         }
 
         .contact-link {
@@ -99,18 +128,75 @@
 
     <div class="container">
         <h2>📨 Contact Users</h2>
-        {% for user in users %}
-            <div class="user-box">
-                <div>{{ user.username }}</div>
-                <a class="contact-link" href="mailto:{{ user.email }}?subject=Message from Manager">
-                    Contact {{ user.username }}
-                </a>
-            </div>
-       
-            
-        {% empty %}
+
+        <!-- Filters -->
+        <div class="filters">
+            <input type="text" id="userSearchInput" class="user-search-input" placeholder="Search by name or email...">
+            <select id="userTypeFilter" class="user-type-filter">
+                <option value="All">All</option>
+                <option value="Teacher">Teacher</option>
+                <option value="Student">Student</option>
+            </select>
+        </div>
+
+        {% if user_list %}
+            <table id="usersTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Type</th>
+                        <th>Contact</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in user_list %}
+                        <tr class="user-row" data-type="{{ item.type }}">
+                            <td class="user-name">{{ item.user.username }}</td>
+                            <td class="user-email">{{ item.user.email }}</td>
+                            <td>{{ item.type }}</td>
+                            <td>
+                                <a class="contact-link" href="mailto:{{ item.user.email }}?subject=Message from Manager">
+                                    Contact
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
             <p class="empty-msg">No users found.</p>
-        {% endfor %}
+        {% endif %}
+
+        <!-- Search + Filter Script -->
+        <script>
+            const searchInput = document.getElementById('userSearchInput');
+            const typeFilter = document.getElementById('userTypeFilter');
+
+            function filterUsers() {
+                const searchValue = searchInput.value.toUpperCase();
+                const typeValue = typeFilter.value;
+                const userRows = document.querySelectorAll('#usersTable .user-row');
+
+                userRows.forEach(function(row) {
+                    const name = row.querySelector('.user-name').textContent.toUpperCase();
+                    const email = row.querySelector('.user-email').textContent.toUpperCase();
+                    const type = row.getAttribute('data-type');
+
+                    const matchesSearch = name.indexOf(searchValue) > -1 || email.indexOf(searchValue) > -1;
+                    const matchesType = (typeValue === 'All') || (type === typeValue);
+
+                    if (matchesSearch && matchesType) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+
+            searchInput.addEventListener('keyup', filterUsers);
+            typeFilter.addEventListener('change', filterUsers);
+        </script>
     </div>
 </body>
 </html>

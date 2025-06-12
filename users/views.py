@@ -1143,20 +1143,54 @@ def list_users(request):
 
 
 
+@login_required
 def contact_users(request):
-    users = User.objects.exclude(is_superuser=True)  # לא כולל מנהל
-    return render(request, 'users/contact_users.html', {'users': users})
+    teachers = Teacher.objects.select_related('user')
+    students = Student.objects.select_related('user')
+
+    user_list = []
+
+    for teacher in teachers:
+        user_list.append({
+            'user': teacher.user,
+            'type': 'Teacher'
+        })
+
+    for student in students:
+        user_list.append({
+            'user': student.user,
+            'type': 'Student'
+        })
+
+    return render(request, 'users/contact_users.html', {
+        'user_list': user_list
+    })
 
 
 
 @login_required
 def student_messages(request):
+    # Get Manager (you already had this)
     manager = User.objects.filter(is_superuser=True).first()
+
+    # Get Student instance
+    student = request.user.student
+
+    # Manager messages (you already had this)
     messages = EmailMessage.objects.filter(receiver=request.user)
+
+    # New: get all Teachers
+    teachers = Teacher.objects.all()
+
+    # Return to template
     return render(request, 'users/student_messages.html', {
         'manager': manager,
-        'messages': messages
+        'messages': messages,
+        'teachers': teachers  # pass the list of all teachers
     })
+
+
+
 
 @login_required
 def teacher_messages(request):

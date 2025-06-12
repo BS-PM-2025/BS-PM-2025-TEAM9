@@ -114,6 +114,16 @@
       color: #999;
       font-size: 15px;
     }
+
+    .teacher-search-input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+
   </style>
 </head>
 <body>
@@ -149,6 +159,52 @@
     {% empty %}
       <p class="no-msg">No messages found.</p>
     {% endfor %}
+
+    <!-- Divider for Teacher Section -->
+    <div class="divider"></div>
+    <h2>📧 Send Message to Any Teacher</h2>
+
+    <!-- Search bar -->
+    <input type="text" id="teacherSearchInput" class="teacher-search-input" placeholder="Search for teachers...">
+
+    {% if teachers %}
+      <div id="teachersList">
+        {% for teacher in teachers %}
+          <div class="teacher-card user-box">
+           <div class="teacher-name" style="font-weight: bold;">
+  {{ teacher.user.username }}
+</div>
+<strong>Teacher Email:</strong> {{ teacher.user.email }}
+
+            <a class="mailto-link"
+               href="mailto:{{ teacher.user.email }}?subject=Message from Student {{ user.username }}&body=My email is: {{ user.email }}">
+              Send Message to {{ teacher.user.username }}
+            </a>
+          </div>
+          <div class="divider"></div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p class="no-msg">No teachers available.</p>
+    {% endif %}
+
+    <!-- Simple search script -->
+    <script>
+      document.getElementById('teacherSearchInput').addEventListener('keyup', function() {
+  let filter = this.value.toUpperCase();
+  let teacherCards = document.querySelectorAll('#teachersList .teacher-card');
+
+  teacherCards.forEach(function(card) {
+    let name = card.querySelector('.teacher-name').textContent.toUpperCase();
+    if (name.indexOf(filter) > -1) {
+      card.style.display = '';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+});
+    </script>
+
   </div>
 
 </body>

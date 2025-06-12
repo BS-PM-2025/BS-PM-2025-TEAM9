@@ -2,14 +2,159 @@
 {% block title %}Students List{% endblock %}
 
 {% block content %}
+
+<!-- Custom style to match your design -->
+<style>
+/* Force background to match your other pages */
+body {
+    background-color: #f4f4f9 !important; /* light gray background */
+    background-image: none !important;    /* remove gradient */
+    color: #333;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Table style */
+#studentsTable {
+    background-color: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+#studentsTable th {
+    background-color: #f5f5f5;
+    color: #333;
+    font-weight: bold;
+    padding: 12px;
+    border-bottom: 1px solid #ddd;
+}
+
+#studentsTable td {
+    color: #333;
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Search bar */
+#searchInput {
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    padding: 10px 16px;
+    font-size: 16px;
+}
+
+/* Level dropdown */
+#levelFilter {
+    border-radius: 12px;
+    border: 1px solid #ccc;
+    padding: 10px 16px;
+    font-size: 16px;
+}
+
+/* Contact button */
+a.btn-success {
+    background-color: #6c63ff; /* purple like your design */
+    border-color: #6c63ff;
+    color: white;
+    border-radius: 8px;
+    font-weight: bold;
+    padding: 8px 16px;
+    text-decoration: none;
+    display: inline-block;
+}
+
+a.btn-success:hover {
+    background-color: #574fd6;
+    border-color: #574fd6;
+    color: white;
+}
+</style>
+
 <div class="container mt-5">
-    <h2>👨‍🎓 Students</h2>
-    <ul class="list-group mt-3">
-        {% for student in students %}
-        <li class="list-group-item">
-            {{ student.user.username }} - {{ student.user.email }}
-        </li>
-        {% endfor %}
-    </ul>
+
+    <h2 class="mb-4">STUDENTS LIST</h2>
+
+    <!-- Filters -->
+    <div class="row mb-3">
+        <div class="col-md-6 mb-2">
+            <input type="text" id="searchInput" class="form-control" placeholder="Search for students...">
+        </div>
+        <div class="col-md-6 mb-2">
+            <select id="levelFilter" class="form-select">
+                <option value="All">All Levels</option>
+                <option value="BEGINNER">Beginner</option>
+                <option value="INTERMEDIATE">Intermediate</option>
+                <option value="ADVANCED">Advanced</option>
+                <option value="Not Assigned">Not Assigned</option>
+            </select>
+        </div>
+    </div>
+
+    <table class="table" id="studentsTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Current Level</th>
+                <th>Contact</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for student in students %}
+                {% if not student.user.is_teacher %}
+                <tr>
+                    <td>{{ student.user.username }}</td>
+                    <td>{{ student.user.email }}</td>
+                    <td class="level-cell">
+                        {% if student.learning_level %}
+                            {{ student.learning_level.name|upper }}
+                        {% else %}
+                            Not Assigned
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="mailto:{{ student.user.email }}" class="btn btn-success">Contact</a>
+                    </td>
+                </tr>
+                {% endif %}
+            {% endfor %}
+        </tbody>
+    </table>
+
 </div>
+
+<!-- Simple search + filter script -->
+<script>
+    // Search filter
+    document.getElementById('searchInput').addEventListener('keyup', function() {
+        filterTable();
+    });
+
+    // Level filter
+    document.getElementById('levelFilter').addEventListener('change', function() {
+        filterTable();
+    });
+
+    function filterTable() {
+        let searchValue = document.getElementById('searchInput').value.toUpperCase();
+        let levelValue = document.getElementById('levelFilter').value;
+        let rows = document.querySelector("#studentsTable tbody").rows;
+        
+        for (let i = 0; i < rows.length; i++) {
+            let nameCol = rows[i].cells[0].textContent.toUpperCase();
+            let emailCol = rows[i].cells[1].textContent.toUpperCase();
+            let levelCol = rows[i].querySelector(".level-cell").textContent.trim();
+
+            let matchesSearch = nameCol.indexOf(searchValue) > -1 || emailCol.indexOf(searchValue) > -1;
+            let matchesLevel = (levelValue === "All") || (levelCol === levelValue);
+
+            if (matchesSearch && matchesLevel) {
+                rows[i].style.display = "";
+            } else {
+                rows[i].style.display = "none";
+            }
+        }
+    }
+</script>
+
 {% endblock %}
