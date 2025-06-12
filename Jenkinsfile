@@ -6,45 +6,45 @@ pipeline {
     }
 
     stages {
-        stage('🔧 Build') {
+        stage('🔧 Setup') {
             steps {
                 echo '🔧 Setting up virtual environment and installing requirements...'
-                bat 'python -m venv %VENV_DIR%'
-                bat '%VENV_DIR%\\Scripts\\activate && pip install --upgrade pip'
-                bat '%VENV_DIR%\\Scripts\\activate && pip install -r requirements.txt'
+                bat 'python -m venv venv'
+                bat '.\\venv\\Scripts\\activate && pip install --upgrade pip'
+                bat '.\\venv\\Scripts\\activate && pip install -r requirements.txt'
             }
         }
 
         stage('🗃️ Migrate') {
             steps {
-                echo 'Running Django migrations...'
-                bat '%VENV_DIR%\\Scripts\\activate && python manage.py migrate'
+                echo 'Applying Django migrations...'
+                bat '.\\venv\\Scripts\\activate && python manage.py migrate'
             }
         }
 
-        stage('✅ Unit Tests') {
+        stage('✅ Run Unit Tests') {
             steps {
-                echo 'Running unit tests...'
-                bat '%VENV_DIR%\\Scripts\\activate && python manage.py test'
+                echo 'Running Django unit tests...'
+                bat '.\\venv\\Scripts\\activate && python manage.py test'
             }
         }
 
         stage('🚀 Deploy') {
             steps {
-                echo 'Deployment placeholder – add real deploy logic here if needed.'
+                echo '🚧 Deployment placeholder (optional)'
             }
         }
     }
 
     post {
         always {
-            echo 'Pipeline finished.'
+            echo '🔁 Pipeline completed.'
         }
         success {
-            echo '✅ Build completed successfully.'
+            echo '✅ SUCCESS: All stages passed!'
         }
         failure {
-            echo '❌ Build failed. Check logs.'
+            echo '❌ FAILURE: Check Console Output for errors.'
         }
     }
 }
