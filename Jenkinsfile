@@ -1,37 +1,32 @@
 pipeline {
     agent any
 
-    environment {
-        VENV_DIR = 'venv'
-    }
-
     stages {
-        stage('🔧 Setup Environment') {
+        stage('🔧 Install Requirements') {
             steps {
-                echo '📦 Creating virtual environment and installing requirements...'
-                sh 'python3 -m venv venv'
-                sh 'source venv/bin/activate && pip install --upgrade pip'
-                sh 'source venv/bin/activate && pip install -r requirements.txt'
+                echo '📦 Installing requirements...'
+                sh 'pip3 install --upgrade pip'
+                sh 'pip3 install -r requirements.txt'
             }
         }
 
         stage('🗃️ Apply Migrations') {
             steps {
-                echo '📄 Applying Django migrations...'
-                sh 'source venv/bin/activate && python manage.py migrate'
+                echo '🗃️ Running Django migrations...'
+                sh 'python3 manage.py migrate'
             }
         }
 
         stage('✅ Run Unit Tests') {
             steps {
-                echo '🧪 Running Django unit tests...'
-                sh 'source venv/bin/activate && python manage.py test'
+                echo '✅ Running tests...'
+                sh 'python3 manage.py test'
             }
         }
 
         stage('🚀 Deploy') {
             steps {
-                echo '🚀 Deploy step - placeholder'
+                echo '🚀 Deployment placeholder'
             }
         }
     }
