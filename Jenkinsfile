@@ -6,45 +6,38 @@ pipeline {
     }
 
     stages {
-        stage('🔧 Build Environment') {
+        stage('Build') {
             steps {
-                echo '📦 Creating virtual environment and installing dependencies...'
-                bat 'python -m venv %VENV_DIR%'
-                bat '%VENV_DIR%\\Scripts\\activate && pip install --upgrade pip'
-                bat '%VENV_DIR%\\Scripts\\activate && pip install -r requirements.txt'
+                echo '🔧 Creating virtual environment and installing dependencies...'
+                bat 'python -m venv venv'
+                bat '.\\venv\\Scripts\\activate && pip install --upgrade pip'
+                bat '.\\venv\\Scripts\\activate && pip install -r requirements.txt'
             }
         }
 
-        stage('🗃️ Apply Migrations') {
+        stage('Test') {
             steps {
-                echo '⚙️ Running Django migrations...'
-                bat '%VENV_DIR%\\Scripts\\activate && python manage.py migrate'
+                echo '✅ Running Django tests...'
+                bat '.\\venv\\Scripts\\activate && python manage.py test'
             }
         }
 
-        stage('✅ Run Unit Tests') {
+        stage('Deploy') {
             steps {
-                echo '🧪 Running Django unit tests...'
-                bat '%VENV_DIR%\\Scripts\\activate && python manage.py test'
-            }
-        }
-
-        stage('🚀 Deploy (placeholder)') {
-            steps {
-                echo '🚧 Deployment stage - add deployment logic here if needed.'
+                echo '🚀 Simulated deploy step (can add real commands here)'
             }
         }
     }
 
     post {
         always {
-            echo '🔁 Pipeline execution completed.'
+            echo '🔁 Pipeline finished.'
         }
         success {
-            echo '✅ SUCCESS: All steps completed successfully!'
+            echo '✅ SUCCESS!'
         }
         failure {
-            echo '❌ FAILURE: Errors encountered during pipeline.'
+            echo '❌ FAILURE – check Console Output.'
         }
     }
 }
