@@ -15,6 +15,15 @@ from django.db.models import Prefetch
 from .models import LessonRecord, Course
 from django.contrib import messages
 from django.contrib.auth.models import User
+from django.utils import timezone
+from django.contrib.auth.forms import UserCreationForm
+
+from .models import EmailMessage  # נניח שיש טבלת הודעות
+from django.contrib.auth.models import User
+from .models import TeacherBio
+
+
+
 
 
 
@@ -27,10 +36,7 @@ def get_homework_by_date(request):
         return JsonResponse({'events': data})
     return JsonResponse({'error': 'No date provided'}, status=400)
 
-@login_required
-def student_messages(request):
-    return render(request, 'users/student_messages.html')
-
+#-------------------------sprint 1 and about us ---signup/login/welcome/about us/home teacher   pages-------------------
 
 def student_signup(request):
     if request.method == 'POST':
@@ -92,391 +98,10 @@ def student_dashboard(request):
         'student': student,
         'level': level,
     })
+
 @login_required
 def student_home(request):
     return render(request, 'users/student_home.html')
-    
-@login_required
-def teacher_home(request):
-    return render(request, 'users/teacher_home.html')
-def root_redirect(request):
-    return redirect('login')
-
-def welcome(request):
-    return render(request, 'users/welcome.html')
-
-
-@login_required
-def redirect_after_login(request):
-    user = request.user
-    if hasattr(user, 'student'):
-        return redirect('student_home')
-    elif hasattr(user, 'teacher'):
-        return redirect('teacher_home')
-    elif hasattr(user, 'manager'):
-        return redirect('manager_home')
-    else:
-        return redirect('login')
-
-def manager_signup(request):
-    if request.method == 'POST':
-        user_form = UserForm(request.POST)
-        manager_form = ManagerSignupForm(request.POST)
-        if user_form.is_valid() and manager_form.is_valid():
-            user = user_form.save(commit=False)
-            user.set_password(user_form.cleaned_data['password'])
-            user.save()
-            manager = manager_form.save(commit=False)
-            manager.user = user
-            manager.save()
-            login(request, user)
-            return redirect('manager_home')
-    else:
-        user_form = UserForm()
-        manager_form = ManagerSignupForm()
-    return render(request, 'users/manager_signup.html', {
-        'user_form': user_form,
-        'profile_form': manager_form
-    })
-@login_required
-def manager_home(request):
-    return render(request, 'users/manager_home.html')
-
-
-def welcome(request):
-    return render(request, 'users/welcome.html')
-def about(request):
-    return render(request, 'users/about.html')
-def about_us(request):
-    return render(request, 'users/about.html') 
-
-
-from django.contrib.auth.forms import UserCreationForm
-from django.shortcuts import render, redirect
-from .models import Student, Teacher
-from .forms import UserForm
-def signup(request):
-    if request.method == 'POST':
-        form = UserForm(request.POST)
-        if form.is_valid():
-            user = form.save(commit=False)
-            user.set_password(form.cleaned_data['password'])
-            user.save()
-
-            profile = form.cleaned_data['profile']
-            if profile == 'student':
-                Student.objects.create(user=user)
-            elif profile == 'teacher':
-                Teacher.objects.create(user=user)
-
-            return redirect('login')  # ✅ במקום login אוטומטי ודף בית
-
-    else:
-        form = UserForm()
-
-    return render(request, 'users/signup.html', {'form': form})
-
-
-
-
-
-# def welcome(request):
-#     return render(request, 'users/welcome.html')
-
-def welcome(request):
-    print("🚀 Welcome page loaded")  # Check terminal output
-    return render(request, 'users/welcome.html')
-
-
-from django.contrib.auth import authenticate, login
-from django.contrib.auth.forms import AuthenticationForm
-from django.shortcuts import render, redirect
-
-
-def login_view(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-
-            # 🔍 Check actual role model connected to user
-            if hasattr(user, 'student'):
-                return redirect('student_home')
-            elif hasattr(user, 'teacher'):
-                return redirect('teacher_home')
-            elif hasattr(user, 'manager'):
-                return redirect('manager_home')
-            else:
-                return redirect('welcome')  # fallback
-
-    else:
-        form = AuthenticationForm()
-
-    return render(request, 'users/login.html', {'form': form})
-
-
-
-
-# @login_required
-# def view_grades(request):
-#     return render(request, 'users/view_grades.html')
-
-
-
-
-
-@login_required
-def edit_student_profile(request):
-    user = request.user
-
-    if request.method == 'POST':
-        current_password = request.POST.get('current_password')
-        new_email = request.POST.get('new_email')
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
-
-        if not user.check_password(current_password):
-            return render(request, 'users/edit_student_profile.html', {'error': 'Incorrect current password'})
-
-        if new_email:
-            user.email = new_email
-
-        if new_password:
-            if new_password == confirm_password:
-                user.set_password(new_password)
-                user.save()
-                update_session_auth_hash(request, user)  # ✅ כדי שהמשתמש לא יתנתק
-            else:
-                return render(request, 'users/edit_student_profile.html', {
-                    'error': 'Passwords do not match'
-                })
-        else:
-            user.save()
-
-        return redirect('student_home')
-
-    return render(request, 'users/edit_student_profile.html')
-
-
-
-@login_required
-def student_diary(request):
-    events = StudentEvent.objects.filter(student=request.user).order_by('date')
-    return render(request, 'users/student_diary.html', {'events': events})
-
-
-
-
-
-
- # ודא שייבאת את המודלים הרלוונטיים
-
-# @login_required
-# def student_home(request):
-#     student = request.user.student  # מניח שיש קשר OneToOne בין User ל-Student
-
-#     events = StudentEvent.objects.filter(student=student)
-#     schedule = StudentSchedule.objects.filter(student__user=request.user).order_by('day', 'time')
-
-#     return render(request, 'users/student_home.html', {
-#         'events': events,
-#         'schedule': schedule,
-#     })
-
-
-
-
-# views.py
-# @login_required
-# def add_lesson(request):
-#     if not hasattr(request.user, 'teacher'):
-#         return redirect('home')
-
-#     if request.method == 'POST':
-#         form = LessonForm(request.POST)
-#         if form.is_valid():
-#             lesson = form.save(commit=False)
-#             lesson.teacher = request.user.teacher
-#             lesson.save()
-#             return redirect('teacher_home')
-#     else:
-#         form = LessonForm()
-
-#     return render(request, 'users/add_lesson.html', {'form': form})
-
-
-# users/views.py
-from .forms import AddLessonForm
-
-@login_required
-def teacher_home(request):
-    teacher = request.user.teacher
-    form = AddLessonForm()
-
-    if request.method == 'POST':
-        form = AddLessonForm(request.POST)
-        if form.is_valid():
-            lesson = form.save(commit=False)
-            lesson.teacher = teacher
-            lesson.save()
-            return redirect('teacher_home')  # מרענן את הדף
-
-    schedule = StudentSchedule.objects.filter(teacher=teacher)
-
-    return render(request, 'users/teacher_home.html', {
-        'form': form,
-        'schedule': schedule,
-    })
-
-
-
-@login_required
-def send_message(request):
-    if request.method == 'POST':
-        student_id = request.POST.get('student_id')
-        message = request.POST.get('message')
-        recipient = User.objects.get(id=student_id)
-        TeacherMessage.objects.create(
-            sender=request.user,
-            recipient=recipient,
-            message=message
-        )
-        return redirect('teacher_home')  # או כל דף אחר שתרצה
-    students = Student.objects.all()
-    return render(request, 'users/send_message.html', {'students': students})
-
-from django.contrib.auth import update_session_auth_hash
-from django.contrib import messages
-from .forms import TeacherProfileUpdateForm  # נטפל בזה עוד רגע
-
-@login_required
-def teacher_profile(request):
-    teacher = request.user.teacher
-    return render(request, 'users/teacher_profile.html', {'teacher': teacher})
-
-
-from .models import StudentSchedule, Student, Teacher
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-
-@login_required
-def add_lesson(request):
-    if request.method == 'POST':
-        student_id = request.POST.get('student_id')
-        subject = request.POST.get('subject')
-        day = request.POST.get('day')
-        time = request.POST.get('time')
-
-        try:
-            student = Student.objects.get(id=student_id)
-            teacher = request.user.teacher
-            StudentSchedule.objects.create(
-                student=student,
-                teacher=teacher,
-                subject=subject,
-                day=day,
-                time=time
-            )
-            messages.success(request, "Lesson added successfully!")
-            return redirect('teacher_home')
-        except Student.DoesNotExist:
-            messages.error(request, "Student not found.")
-
-    students = Student.objects.all()
-    return render(request, 'users/add_lesson.html', {'students': students})
-
-@login_required
-def teacher_profile(request):
-    user = request.user
-
-    if request.method == 'POST':
-        current_password = request.POST.get('current_password')
-        new_email = request.POST.get('new_email')
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
-
-        if not user.check_password(current_password):
-            return render(request, 'users/teacher_profile.html', {'error': 'Incorrect current password'})
-
-        if new_email:
-            user.email = new_email
-
-        if new_password:
-            if new_password == confirm_password:
-                user.set_password(new_password)
-                user.save()
-                update_session_auth_hash(request, user)
-            else:
-                return render(request, 'users/teacher_profile.html', {
-                    'error': 'Passwords do not match'
-                })
-
-        user.save()
-        return render(request, 'users/teacher_profile.html', {'success': 'Profile updated successfully'})
-
-    return render(request, 'users/teacher_profile.html')
-
-
-@login_required
-def edit_teacher_profile(request):
-    user = request.user
-
-    if request.method == 'POST':
-        current_password = request.POST.get('current_password')
-        new_email = request.POST.get('new_email')
-        new_password = request.POST.get('new_password')
-        confirm_password = request.POST.get('confirm_password')
-
-        if not user.check_password(current_password):
-            return render(request, 'users/edit_teacher_profile.html', {'error': 'Incorrect current password'})
-
-        if new_email:
-            user.email = new_email
-
-        if new_password:
-            if new_password == confirm_password:
-                user.set_password(new_password)
-                user.save()
-                update_session_auth_hash(request, user)
-            else:
-                return render(request, 'users/edit_teacher_profile.html', {
-                    'error': 'Passwords do not match'
-                })
-        else:
-            user.save()
-
-        return redirect('teacher_home')
-
-    return render(request, 'users/edit_teacher_profile.html')
-
-
-
-
-
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import Student, StudentSchedule, TeacherMessage
-from django.utils import timezone
-
-# @login_required
-# def student_home(request):
-#     try:
-#         student = Student.objects.get(user=request.user)
-#     except Student.DoesNotExist:
-#         return redirect('login')
-
-#     schedules = StudentSchedule.objects.filter(student=student)
-#     today = timezone.now().date()
-#     daily_events = StudentSchedule.objects.filter(student=student, date=today)
-
-#     return render(request, 'users/student_home.html', {
-#         'schedules': schedules,
-#         'daily_events': daily_events,
-#     })
-
-# users/views.py
-
 
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
@@ -536,11 +161,233 @@ def student_home(request):
         'messages': recent_messages
     }
     return render(request, 'users/student_home.html', context)
-# @login_required
-# def student_messages(request):
-#     student_user = request.user
-#     messages = TeacherMessage.objects.filter(recipient=student_user).order_by('-sent_at')
-#     return render(request, 'users/student_messages.html', {'messages': messages})
+    
+
+@login_required
+def teacher_home(request):
+    return render(request, 'users/teacher_home.html')
+def root_redirect(request):
+    return redirect('login')
+
+from .forms import AddLessonForm
+
+@login_required
+def teacher_home(request):
+    teacher = request.user.teacher
+    form = AddLessonForm()
+
+    if request.method == 'POST':
+        form = AddLessonForm(request.POST)
+        if form.is_valid():
+            lesson = form.save(commit=False)
+            lesson.teacher = teacher
+            lesson.save()
+            return redirect('teacher_home')  # מרענן את הדף
+
+    schedule = StudentSchedule.objects.filter(teacher=teacher)
+
+    return render(request, 'users/teacher_home.html', {
+        'form': form,
+        'schedule': schedule,
+    })
+
+
+
+
+
+@login_required
+def redirect_after_login(request):
+    user = request.user
+    if hasattr(user, 'student'):
+        return redirect('student_home')
+    elif hasattr(user, 'teacher'):
+        return redirect('teacher_home')
+    elif hasattr(user, 'manager'):
+        return redirect('manager_home')
+    else:
+        return redirect('login')
+
+def manager_signup(request):
+    if request.method == 'POST':
+        user_form = UserForm(request.POST)
+        manager_form = ManagerSignupForm(request.POST)
+        if user_form.is_valid() and manager_form.is_valid():
+            user = user_form.save(commit=False)
+            user.set_password(user_form.cleaned_data['password'])
+            user.save()
+            manager = manager_form.save(commit=False)
+            manager.user = user
+            manager.save()
+            login(request, user)
+            return redirect('manager_home')
+    else:
+        user_form = UserForm()
+        manager_form = ManagerSignupForm()
+    return render(request, 'users/manager_signup.html', {
+        'user_form': user_form,
+        'profile_form': manager_form
+    })
+@login_required
+def manager_home(request):
+    return render(request, 'users/manager_home.html')
+
+
+
+def about(request):
+    return render(request, 'users/about.html')
+def about_us(request):
+    return render(request, 'users/about.html') 
+
+
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+
+            profile = form.cleaned_data['profile']
+            if profile == 'student':
+                Student.objects.create(user=user)
+            elif profile == 'teacher':
+                Teacher.objects.create(user=user)
+
+            return redirect('login')  # ✅ במקום login אוטומטי ודף בית
+
+    else:
+        form = UserForm()
+
+    return render(request, 'users/signup.html', {'form': form})
+
+
+
+
+def welcome(request):
+    print("🚀 Welcome page loaded")  # Check terminal output
+    return render(request, 'users/welcome.html')
+
+
+
+
+def login_view(request):
+    if request.method == 'POST':
+        form = AuthenticationForm(data=request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            login(request, user)
+
+            # 🔍 Check actual role model connected to user
+            if hasattr(user, 'student'):
+                return redirect('student_home')
+            elif hasattr(user, 'teacher'):
+                return redirect('teacher_home')
+            elif hasattr(user, 'manager'):
+                return redirect('manager_home')
+            else:
+                return redirect('welcome')  # fallback
+
+    else:
+        form = AuthenticationForm()
+
+    return render(request, 'users/login.html', {'form': form})
+#--------------------------------------------------------------------------------
+
+#-------------profile users --------------------------
+
+@login_required
+def edit_student_profile(request):
+    user = request.user
+
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_email = request.POST.get('new_email')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        if not user.check_password(current_password):
+            return render(request, 'users/edit_student_profile.html', {'error': 'Incorrect current password'})
+
+        if new_email:
+            user.email = new_email
+
+        if new_password:
+            if new_password == confirm_password:
+                user.set_password(new_password)
+                user.save()
+                update_session_auth_hash(request, user)  # ✅ כדי שהמשתמש לא יתנתק
+            else:
+                return render(request, 'users/edit_student_profile.html', {
+                    'error': 'Passwords do not match'
+                })
+        else:
+            user.save()
+
+        return redirect('student_home')
+
+    return render(request, 'users/edit_student_profile.html')
+
+
+@login_required
+def edit_teacher_profile(request):
+    user = request.user
+
+    if request.method == 'POST':
+        current_password = request.POST.get('current_password')
+        new_email = request.POST.get('new_email')
+        new_password = request.POST.get('new_password')
+        confirm_password = request.POST.get('confirm_password')
+
+        if not user.check_password(current_password):
+            return render(request, 'users/edit_teacher_profile.html', {'error': 'Incorrect current password'})
+
+        if new_email:
+            user.email = new_email
+
+        if new_password:
+            if new_password == confirm_password:
+                user.set_password(new_password)
+                user.save()
+                update_session_auth_hash(request, user)
+            else:
+                return render(request, 'users/edit_teacher_profile.html', {
+                    'error': 'Passwords do not match'
+                })
+        else:
+            user.save()
+
+        return redirect('teacher_home')
+
+    return render(request, 'users/edit_teacher_profile.html')
+
+#---------------------------------------------------------------------------------------
+
+@login_required
+def student_diary(request):
+    events = StudentEvent.objects.filter(student=request.user).order_by('date')
+    return render(request, 'users/student_diary.html', {'events': events})
+
+
+
+
+@login_required
+def send_message(request):
+    if request.method == 'POST':
+        student_id = request.POST.get('student_id')
+        message = request.POST.get('message')
+        recipient = User.objects.get(id=student_id)
+        TeacherMessage.objects.create(
+            sender=request.user,
+            recipient=recipient,
+            message=message
+        )
+        return redirect('teacher_home')  # או כל דף אחר שתרצה
+    students = Student.objects.all()
+    return render(request, 'users/send_message.html', {'students': students})
+
+
+
 
 @login_required
 def student_messages(request):
@@ -548,19 +395,12 @@ def student_messages(request):
     messages = TeacherMessage.objects.filter(recipient=student_user).order_by('-sent_at')
     return render(request, 'users/student_messages.html', {'messages': messages})
 
-# users/views.py
 
 from .models import Student
 
 def view_students(request):
     students = Student.objects.all()
     return render(request, 'users/view_students.html', {'students': students})
-
-@login_required
-def teacher_messages(request):
-    student_user = request.user
-    messages = TeacherMessage.objects.filter(recipient=student_user).order_by('-sent_at')
-    return render(request, 'users/teacher_messages.html', {'messages': messages})
 
 
 
@@ -1262,20 +1102,7 @@ def upload_material(request):
 
     return render(request, 'users/upload_material.html', {'form': form})
 
-# @login_required
-# def course_detail(request, course_id):
-#     course = get_object_or_404(Course, id=course_id)
-#     sections = course.sections.prefetch_related('contents')
 
-#     # כל הקבצים בקורס הזה לפי הרמה
-#     level = course.learning_level
-#     contents = SectionContent.objects.filter(section__course__learning_level=level)
-
-#     return render(request, 'users/course_detail.html', {
-#         'course': course,
-#         'sections': sections,
-#         'level_contents': contents
-#     })
 
 
 def view_lesson_records(request):
@@ -1308,9 +1135,7 @@ def delete_user(request, user_id):
     messages.success(request, f"User {user.username} deleted.")
     return redirect('manage_users')
 
-
-# users/views.py
-from django.shortcuts import render
+#-----------------------add bio/ send mail / list users ti contact/-----------------------------
 
 def list_users(request):
     # לוגיקה להצגת משתמשים
@@ -1322,11 +1147,7 @@ def contact_users(request):
     users = User.objects.exclude(is_superuser=True)  # לא כולל מנהל
     return render(request, 'users/contact_users.html', {'users': users})
 
-# users/views.py
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .models import EmailMessage  # נניח שיש טבלת הודעות
-from django.contrib.auth.models import User
+
 
 @login_required
 def student_messages(request):
@@ -1347,10 +1168,7 @@ def teacher_messages(request):
     })
 
 
-# users/views.py
-from django.shortcuts import render, redirect
-from .models import TeacherBio
-from django.contrib.auth.decorators import login_required
+
 
 @login_required
 def add_teacher_bio(request):
@@ -1363,9 +1181,7 @@ def add_teacher_bio(request):
     bios = TeacherBio.objects.filter(user=request.user).order_by('-created_at')
     return render(request, 'users/add_bio.html', {'bios': bios})
 
-from django.shortcuts import redirect, get_object_or_404
-from .models import TeacherBio
-from django.contrib.auth.decorators import login_required
+
 
 @login_required
 def delete_teacher_bio(request, bio_id):

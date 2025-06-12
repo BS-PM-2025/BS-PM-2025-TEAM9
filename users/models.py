@@ -331,12 +331,7 @@ class EmailMessage(models.Model):
 
 
     
-# class TeacherProfile(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     bio = models.TextField(blank=True)
 
-#     def __str__(self):
-#         return self.user.username
 
 class TeacherBio(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -345,3 +340,19 @@ class TeacherBio(models.Model):
 
     def __str__(self):
         return f"{self.user.username} - {self.created_at.strftime('%Y-%m-%d %H:%M')}"
+    
+
+from django.utils import timezone
+
+class Submission(models.Model):
+    assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
+    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    submitted_file = models.FileField(upload_to='submissions/', null=True, blank=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def is_late(self):
+        due_date = getattr(self.assignment.content, 'assignment_due_date', None)
+        if due_date:
+            return timezone.now().date() > due_date
+        return False
