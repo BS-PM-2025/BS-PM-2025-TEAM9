@@ -9,35 +9,29 @@ pipeline {
         stage('🔧 Setup Environment') {
             steps {
                 echo '📦 Creating virtual environment and installing requirements...'
-                bat 'python -m venv %VENV_DIR%'
-                bat '%VENV_DIR%\\Scripts\\activate && pip install --upgrade pip'
-                bat '%VENV_DIR%\\Scripts\\activate && pip install -r requirements.txt'
+                sh 'python3 -m venv venv'
+                sh 'source venv/bin/activate && pip install --upgrade pip'
+                sh 'source venv/bin/activate && pip install -r requirements.txt'
             }
         }
 
         stage('🗃️ Apply Migrations') {
             steps {
-                echo '⚙️ Applying Django migrations...'
-                bat """
-                call %VENV_DIR%\\Scripts\\activate
-                python manage.py migrate
-                """
+                echo '📄 Applying Django migrations...'
+                sh 'source venv/bin/activate && python manage.py migrate'
             }
         }
 
         stage('✅ Run Unit Tests') {
             steps {
                 echo '🧪 Running Django unit tests...'
-                bat """
-                call %VENV_DIR%\\Scripts\\activate
-                python manage.py test
-                """
+                sh 'source venv/bin/activate && python manage.py test'
             }
         }
 
         stage('🚀 Deploy') {
             steps {
-                echo '🚧 Deployment placeholder (optional)'
+                echo '🚀 Deploy step - placeholder'
             }
         }
     }
