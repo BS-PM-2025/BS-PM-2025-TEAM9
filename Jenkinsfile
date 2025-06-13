@@ -1,10 +1,21 @@
 pipeline {
     agent any
 
+    environment {
+        VENV = "venv"
+    }
+
     stages {
-        stage('🔧 Install Requirements') {
+        stage('📥 Checkout Source') {
             steps {
-                echo '📦 Installing requirements...'
+                echo '📥 Cloning repository...'
+                checkout scm
+            }
+        }
+
+        stage('📦 Install Requirements') {
+            steps {
+                echo '📦 Installing dependencies...'
                 sh 'pip3 install --upgrade pip'
                 sh 'pip3 install -r requirements.txt'
             }
@@ -17,29 +28,30 @@ pipeline {
             }
         }
 
-        stage('✅ Run Unit Tests') {
+        stage('🧪 Run Unit Tests') {
             steps {
-                echo '✅ Running tests...'
-                sh 'python3 manage.py test'
+                echo '🧪 Running tests...'
+                sh 'python3 manage.py test --verbosity=2'
             }
         }
 
         stage('🚀 Deploy') {
             steps {
-                echo '🚀 Deployment placeholder'
+                echo '🚀 Deployment step (placeholder)'
+                // תוכל להוסיף כאן שליחת קבצים, docker deploy וכו'
             }
         }
     }
 
     post {
         always {
-            echo '🔁 Jenkins Pipeline completed.'
+            echo '🔁 Pipeline finished running.'
         }
         success {
-            echo '✅ SUCCESS: All stages passed!'
+            echo '✅ All stages passed successfully!'
         }
         failure {
-            echo '❌ FAILURE: Check Console Output for errors.'
+            echo '❌ Pipeline failed. Check logs for more info.'
         }
     }
 }
