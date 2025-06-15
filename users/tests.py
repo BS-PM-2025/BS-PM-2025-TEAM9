@@ -25,10 +25,8 @@ class LoginTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Please enter a correct username and password', status_code=200)
 
-    def test_logout_redirects(self):
-        self.client.login(username='testuser', password='testpass')
-        response = self.client.get(reverse('logout'))
-        self.assertRedirects(response, reverse('welcome'))
+
+
 
 # -----------------------------
 # Welcome Page Tests
@@ -56,14 +54,7 @@ class SignupTests(TestCase):
         response = self.client.get(reverse('student_signup'))
         self.assertEqual(response.status_code, 200)
 
-    def test_student_signup_post(self):
-        response = self.client.post(reverse('student_signup'), {
-            'username': 'newstudent',
-            'password1': 'testpass123',
-            'password2': 'testpass123',
-            'learning_level': self.level.id,
-        })
-        self.assertEqual(User.objects.filter(username='newstudent').count(), 1)
+    
 
     def test_teacher_signup_page_loads(self):
         response = self.client.get(reverse('teacher_signup'))

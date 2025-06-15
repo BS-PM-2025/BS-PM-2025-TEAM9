@@ -24,6 +24,7 @@ urlpatterns = [
 
 
 
+
     # Assignments
     path('assignments/', views.assignment_list, name='assignment_list'),
     path('assignments/submit', views.submit_assignment, name='submit_assignment'),
