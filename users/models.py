@@ -345,14 +345,47 @@ class TeacherBio(models.Model):
 from django.utils import timezone
 
 class Submission(models.Model):
+    STATUS_CHOICES = [
+        ('draft', 'Draft'),
+        ('submitted', 'Submitted'),
+        ('late', 'Submitted Late'),
+        ('graded', 'Graded'),
+    ]
+
     assignment = models.ForeignKey(Assignment, on_delete=models.CASCADE)
-    student = models.ForeignKey(User, on_delete=models.CASCADE)
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
     submitted_file = models.FileField(upload_to='submissions/', null=True, blank=True)
     submitted_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
+    grade = models.PositiveIntegerField(blank=True, null=True)
+    feedback = models.TextField(blank=True, null=True)
+    teacher_notes = models.TextField(blank=True, null=True)
+
+    def save(self, *args, **kwargs):
+        now = timezone.now()
+
+        # Automatically determine the status
+        if self.grade is not None:
+            self.status = 'graded'
+        elif self.submitted_file:
+            if self.assignment.deadline and now > self.assignment.deadline:
+                self.status = 'late'
+            else:
+                self.status = 'submitted'
+        else:
+            self.status = 'draft'
+
+        super().save(*args, **kwargs)
 
     @property
     def is_late(self):
-        due_date = getattr(self.assignment.content, 'assignment_due_date', None)
-        if due_date:
-            return timezone.now().date() > due_date
-        return False
+        return self.assignment.deadline and self.submitted_at > self.assignment.deadline
+
+    @property
+    def points_percentage(self):
+        if self.grade is not None and self.assignment.max_points > 0:
+            return (self.grade / self.assignment.max_points) * 100
+        return None
+
+    def __str__(self):
+        return f"{self.student}'s submission for {self.assignment}"

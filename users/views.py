@@ -602,6 +602,11 @@ def grade_submission(request, submission_id):
         'assignment': submission.assignment,
     })
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, render
+from django.http import HttpResponseForbidden
+from .models import Course, Enrollment  # Adjust if needed
+
 @login_required
 def view_grades(request, course_id):
     course = get_object_or_404(Course, id=course_id)
@@ -611,14 +616,15 @@ def view_grades(request, course_id):
         student=request.user.student,
         course=course
     ).exists():
-        return HttpResponseForbidden()
+        return HttpResponseForbidden("Only enrolled students can view grades.")
     
     # Get all assignments in this course with the student's submissions
     assignments = []
+    student = request.user.student  # ✅ cleaner reference
     for section in course.sections.all():
         for content in section.contents.filter(content_type='assignment'):
             assignment = content.assignment
-            submission = assignment.get_student_submission(request.user.student)
+            submission = assignment.get_student_submission(student)  # ✅ pass Student instance
             assignments.append({
                 'assignment': assignment,
                 'submission': submission,
@@ -629,6 +635,7 @@ def view_grades(request, course_id):
         'course': course,
         'assignments': assignments,
     })
+
 
 
 @login_required
